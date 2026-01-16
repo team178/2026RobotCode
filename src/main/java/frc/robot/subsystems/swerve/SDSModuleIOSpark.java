@@ -9,6 +9,7 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkAbsoluteEncoder;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -49,29 +50,29 @@ public class SDSModuleIOSpark implements SDSModuleIO {
     }
     
     public void updateInputs(SDSModuleIOInputs inputs) {
-        inputs.turnPosition = new Rotation2d(/*Put ID constant here*/);
-        inputs.turnVelocityRadPerSec = turnEncoder.getVelocity();
-        inputs.turnAppliedVolts = turnMotor.getAppliedOutput() * turnMotor.getBusVoltage();
-        inputs.turnCurrentAmps = turnMotor.getOutputCurrent();
+        inputs.turnPosition = new Rotation2d(turnEncoder.getPosition() - SwerveModuleConstants.zeroRotations[index].getRadians());
+        // inputs.turnVelocityRadPerSec = turnEncoder.getVelocity();
+        // inputs.turnAppliedVolts = turnMotor.getAppliedOutput() * turnMotor.getBusVoltage();
+        // inputs.turnCurrentAmps = turnMotor.getOutputCurrent();
     }
 
     public void setTurnPosition(Rotation2d position) {
-
+        turnController.setSetpoint(position.getRadians() + SwerveModuleConstants.zeroRotations[index].getRadians(), ControlType.kPosition);
     }
 
     public void setDriveVelocityRadPerSec(double velocityRadPerSec) {
-
+        driveController.setSetpoint(velocityRadPerSec, ControlType.kVelocity);
     }
 
-    public void setTurnOpenLoop(double output) {
+    // public void setTurnOpenLoop(double output) {
+    //     turnMotor.setVoltage(output);
+    // }
 
-    }
+    // public void setDriveOpenLoop(double output) {
+    //     driveMotor.setVoltage(output);
+    // }
 
-    public void setDriveOpenLoop(double output) {
+    // public void updateControlConstants() {
         
-    }
-
-    public void updateControlConstants() {
-        
-    }
+    // }
 }

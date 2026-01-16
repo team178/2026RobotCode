@@ -4,7 +4,7 @@ import frc.robot.subsystems.swerve.GyroIO.GyroIOInputs;
 
 public class SwerveDrive {
     private final GyroIO gyroIO;
-    private final GyroIOInputs gyroIOInputs;
+    private final GyroIOInputsAutoLogged gyroIOInputs;
     
     private final SDSSwerveModule[] modules;
 
