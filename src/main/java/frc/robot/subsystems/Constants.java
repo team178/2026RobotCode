@@ -14,6 +14,7 @@ public class Constants {
 
         public static final int pigeonCANID = 9;
 		public static double kWheelRadiusMeters = 9;
+        //legacy
     }
 
     public static class SwerveModuleConstants {
