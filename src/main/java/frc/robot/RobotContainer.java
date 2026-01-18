@@ -4,17 +4,68 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.Constants;
+import frc.robot.subsystems.Constants.OperatorConstants;
+import frc.robot.subsystems.swerve.GyroIO;
+import frc.robot.subsystems.swerve.GyroIOPigeon;
+import frc.robot.subsystems.swerve.SDSModuleIO;
+import frc.robot.subsystems.swerve.SDSModuleIOSpark;
+import frc.robot.subsystems.swerve.SwerveDrive;
 
 public class RobotContainer {
-  public RobotContainer() {
-    configureBindings();
-  }
+    private final CommandXboxController driverController;
+    private final CommandXboxController auxController;
 
-  private void configureBindings() {}
+    private final SwerveDrive swerve;
 
-  public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
-  }
+    public RobotContainer() {
+        Preferences.removeAll();
+
+        driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
+        auxController = new CommandXboxController(OperatorConstants.kAuxControllerPort);
+
+        switch(Constants.currentMode) {
+            case REAL:
+            case SIM: // no sim classes for now
+                swerve = new SwerveDrive(
+                    new GyroIOPigeon(),
+                    new SDSModuleIOSpark(0),
+                    new SDSModuleIOSpark(1),
+                    new SDSModuleIOSpark(2),
+                    new SDSModuleIOSpark(3)
+                );
+                break;
+            default:
+                swerve = new SwerveDrive(
+                    new GyroIO() {},
+                    new SDSModuleIO() {},
+                    new SDSModuleIO() {},
+                    new SDSModuleIO() {},
+                    new SDSModuleIO() {}
+                );
+                break;
+        }
+
+        configureBindings();
+    }
+
+    private void configureBindings() {
+        swerve.setDefaultCommand(swerve.runDriveInputs(
+            driverController::getLeftX, // vx
+            driverController::getLeftY, // vy
+            driverController::getRightX, // omega
+            driverController::getRightTriggerAxis // raw slow input
+        ));
+
+        driverController.y().onTrue(swerve.runZeroGyro());
+        driverController.back().onTrue(swerve.runToggleToXPosition(true));
+    }
+
+    public Command getAutonomousCommand() {
+        return Commands.print("No autonomous command configured");
+    }
 }

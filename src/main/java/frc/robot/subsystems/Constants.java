@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -10,9 +9,24 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 public class Constants {
+    public static enum RobotMode {
+		/** Running on a real robot. */
+		REAL,
+	
+		/** Running a physics simulator. */
+		SIM,
+	
+		/** Replaying from a log file. */
+		REPLAY;
+	}
+
+    public static final RobotMode simMode = RobotMode.SIM;
+	public static final RobotMode currentMode = RobotBase.isReal() ? RobotMode.REAL : simMode;
+
     public static boolean isRed() {
         return DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red;
     }
@@ -127,5 +141,10 @@ public class Constants {
                 .positionConversionFactor(2 * Math.PI)
                 .velocityConversionFactor(2 * Math.PI);
         }
+    }
+
+    public static class OperatorConstants {
+        public static final int kDriverControllerPort = 0;
+        public static final int kAuxControllerPort = 1;
     }
 }
