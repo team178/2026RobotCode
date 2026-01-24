@@ -7,6 +7,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 public interface SDSModuleIO {
     @AutoLog
     public static class SDSModuleIOInputs {
+        public boolean driveConnected = false;
+        public boolean turnConnected = false;
+
         public Rotation2d turnPosition = new Rotation2d();
         public double turnVelocityRadPerSec = 0;
         

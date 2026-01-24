@@ -13,6 +13,7 @@ import frc.robot.subsystems.Constants.OperatorConstants;
 import frc.robot.subsystems.swerve.GyroIO;
 import frc.robot.subsystems.swerve.GyroIOPigeon;
 import frc.robot.subsystems.swerve.SDSModuleIO;
+import frc.robot.subsystems.swerve.SDSModuleIOSim;
 import frc.robot.subsystems.swerve.SDSModuleIOSpark;
 import frc.robot.subsystems.swerve.SwerveDrive;
 
@@ -30,13 +31,21 @@ public class RobotContainer {
 
         switch(Constants.currentMode) {
             case REAL:
-            case SIM: // no sim classes for now
                 swerve = new SwerveDrive(
                     new GyroIOPigeon(),
                     new SDSModuleIOSpark(0),
                     new SDSModuleIOSpark(1),
                     new SDSModuleIOSpark(2),
                     new SDSModuleIOSpark(3)
+                );
+                break;
+            case SIM:
+                swerve = new SwerveDrive(
+                    new GyroIO() {},
+                    new SDSModuleIOSim(),
+                    new SDSModuleIOSim(),
+                    new SDSModuleIOSim(),
+                    new SDSModuleIOSim()
                 );
                 break;
             default:

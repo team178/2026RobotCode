@@ -18,7 +18,7 @@ public class GyroIOPigeon implements GyroIO {
     private final StatusSignal<AngularVelocity> yawVelocity;
 
     public GyroIOPigeon() {
-        pigeon = new Pigeon2(SwerveConstants.pigeonCANID, "rio");
+        pigeon = new Pigeon2(SwerveConstants.pigeonCANID);
         pigeon.getConfigurator().apply(new Pigeon2Configuration());
         pigeon.reset();
         pigeon.optimizeBusUtilization();

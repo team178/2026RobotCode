@@ -1,5 +1,7 @@
 package frc.robot.subsystems.swerve;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -26,10 +28,6 @@ public class SDSSwerveModule {
         this.io = io;
         desiredModuleState = new SwerveModuleState(0, Rotation2d.fromDegrees(0));
     }
-
-    // public void setDesiredState(SwerveModuleState desiredState) {
-    //     setDesiredState(desiredState, true);
-    // }
 
     public void setDesiredState(SwerveModuleState state, boolean optimize) {
         // if(!enabled()) {
@@ -61,8 +59,8 @@ public class SDSSwerveModule {
 
     public SwerveModuleState getCurrentState() {
         return new SwerveModuleState(
-            // inputs.driveVelocityRadPerSec * SwerveConstants.kWheelRadiusMeters,
-            // inputs.turnPosition
+            inputs.driveVelocityRadPerSec * SwerveConstants.kWheelRadiusMeters,
+            inputs.turnPosition
         );
     }
 
@@ -72,18 +70,14 @@ public class SDSSwerveModule {
 
     public SwerveModulePosition getPosition() {
         return new SwerveModulePosition(
-            // inputs.drivePositionRad * SwerveConstants.kWheelRadiusMeters,
-            // inputs.turnPosition
+            inputs.drivePositionRad * SwerveConstants.kWheelRadiusMeters,
+            inputs.turnPosition
         );
     }
 
     public void updateControlConstants() { // don't spam run
         io.updateControlConstants();
     }
-
-    // public SDSModuleIOInputs getInputs() 
-    {}
-        // return inputs;
     
 
     public boolean enabled() {
@@ -97,8 +91,7 @@ public class SDSSwerveModule {
 
     public void periodic() {
         putInfo();
-        // io.updateInputs(inputs);
-        // Logger.processInputs("Swerve/Module" + index, inputs);
+        io.updateInputs(inputs);
+        Logger.processInputs("Swerve/" + name, inputs);
     }
-
 }
