@@ -12,6 +12,7 @@ public interface SDSModuleIO {
 
         public Rotation2d turnPosition = new Rotation2d();
         public double turnVelocityRadPerSec = 0;
+        public double canCoderPosition = 0;
         
         public double turnAppliedVolts = 0;
         public double turnCurrentAmps = 0;

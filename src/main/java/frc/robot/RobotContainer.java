@@ -63,15 +63,31 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        swerve.setDefaultCommand(swerve.runDriveInputs(
-            driverController::getLeftX, // vx
-            driverController::getLeftY, // vy
-            driverController::getRightX, // omega
-            driverController::getRightTriggerAxis // raw slow input
-        ));
+        // swerve.setDefaultCommand(swerve.runDriveInputs(
+        //     driverController::getLeftX, // vx
+        //     driverController::getLeftY, // vy
+        //     driverController::getRightX, // omega
+        //     driverController::getRightTriggerAxis // raw slow input
+        // ));
+
+        // TODO function to start pid testing on tuesday
+        driverController.a().whileTrue(
+            swerve.runDriveInputs(
+                () -> 0, // vx
+                () -> -1, // vy
+                () -> 0, // omega
+                () -> 0 // raw slow input
+            )
+        );
+
+        // driverController.a().whileTrue(swerve.goofyFunction());
 
         driverController.y().onTrue(swerve.runZeroGyro());
         driverController.back().onTrue(swerve.runToggleToXPosition(true));
+    }
+
+    public void testPeriodic() {
+        swerve.periodic();
     }
 
     public Command getAutonomousCommand() {

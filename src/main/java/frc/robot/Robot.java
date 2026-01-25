@@ -24,16 +24,15 @@ public class Robot extends LoggedRobot {
         // record metadata about the log
         Logger.recordMetadata("Robot", "TestBot");
         Logger.recordMetadata("Season", "2026 REBUILT");
+        Logger.recordMetadata("RobotMode", Constants.currentMode.equals(Constants.RobotMode.REAL) ? "REAL" : (
+            Constants.currentMode.equals(Constants.RobotMode.SIM) ? "SIM" : "REPLAY"
+        ));
 
         if (
             Constants.currentMode.equals(Constants.RobotMode.REAL) ||
             Constants.currentMode.equals(Constants.RobotMode.SIM)
         ) {
-            Logger.recordMetadata("RobotMode", Constants.currentMode.equals(Constants.RobotMode.REAL) ? "REAL" : (
-                Constants.currentMode.equals(Constants.RobotMode.SIM) ? "SIM" : "REPLAY"
-            ));
-
-            Logger.addDataReceiver(new WPILOGWriter());
+            // Logger.addDataReceiver(new WPILOGWriter());
             Logger.addDataReceiver(new NT4Publisher());
         } else {
             setUseTiming(false); // Run as fast as possible
@@ -66,7 +65,7 @@ public class Robot extends LoggedRobot {
         m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
         if (m_autonomousCommand != null) {
-        CommandScheduler.getInstance().schedule(m_autonomousCommand);
+            CommandScheduler.getInstance().schedule(m_autonomousCommand);
         }
     }
 
@@ -79,7 +78,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void teleopInit() {
         if (m_autonomousCommand != null) {
-        m_autonomousCommand.cancel();
+            m_autonomousCommand.cancel();
         }
     }
 
@@ -95,7 +94,9 @@ public class Robot extends LoggedRobot {
     }
 
     @Override
-    public void testPeriodic() {}
+    public void testPeriodic() {
+        m_robotContainer.testPeriodic();
+    }
 
     @Override
     public void testExit() {}

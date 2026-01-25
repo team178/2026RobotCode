@@ -237,6 +237,21 @@ public class SwerveDrive extends SubsystemBase {
         poseEstimator.addVisionMeasurement(visionMeasurement, timestamp, stdDevs);
     }
 
+    /** function that tests module motor controllers by giving them a preset state */
+    public Command goofyFunction() {
+        return run(() -> {
+            for (SDSSwerveModule module : modules) {
+                module.setGoofyState();
+            }
+            // setRawModuleSetpoints(new SwerveModuleState[] {
+            //     new SwerveModuleState(0.2, new Rotation2d()),
+            //     new SwerveModuleState(0.2, new Rotation2d()),
+            //     new SwerveModuleState(0.2, new Rotation2d()),
+            //     new SwerveModuleState(0.2, new Rotation2d())
+            // }, true);
+        });
+    }
+
     @Override
     public void periodic() {
         // updated all hardware inputs
@@ -246,6 +261,8 @@ public class SwerveDrive extends SubsystemBase {
         for (SDSSwerveModule module : modules) {
             module.periodic();
         }
+
+        SwerveModuleState[] moduleStates = new SwerveModuleState[4];
 
         // process updates from hardware
         SwerveModulePosition[] updatedModulePositions = new SwerveModulePosition[4];
@@ -258,6 +275,7 @@ public class SwerveDrive extends SubsystemBase {
                 updatedModulePositions[i].angle.minus(modulePositions[i].angle)
             );
             modulePositions[i] = updatedModulePositions[i];
+            moduleStates[i] = modules[i].getCurrentState();
         }
 
         if (gyroIOInputs.connected) {
@@ -269,6 +287,7 @@ public class SwerveDrive extends SubsystemBase {
 
         // record updated positions and update odometry
         Logger.recordOutput("Swerve/Positions", updatedModulePositions);
+        Logger.recordOutput("Swerve/ActualStates", moduleStates);
         poseEstimator.update(rawGyroRotation, updatedModulePositions);
     }
 }

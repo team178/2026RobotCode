@@ -6,51 +6,48 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.robot.subsystems.Constants.SwerveModuleConstants;
 
 // sim based on the advantagekit 2026 swerve example
 public class SDSModuleIOSim implements SDSModuleIO {
     private final DCMotorSim driveSim;
     private final DCMotorSim turnSim;
 
-    public static final double driveMotorReduction = (45.0 * 22.0) / (14.0 * 15.0); // TODO get actual robot reduction
     public static final DCMotor driveGearbox = DCMotor.getNEO(1);
 
-    public static final double driveEncoderPositionFactor = 2 * Math.PI / driveMotorReduction; // rotor rotations -> wheel radians
-    public static final double driveEncoderVelocityFactor = (2 * Math.PI) / 60.0 / driveMotorReduction; // RPM -> wheel rad/sec
+    public static final double driveEncoderPositionFactor = 2 * Math.PI / SwerveModuleConstants.driveMotorReduction; // rotor rotations -> wheel radians
+    public static final double driveEncoderVelocityFactor = (2 * Math.PI) / 60.0 / SwerveModuleConstants.driveMotorReduction; // RPM -> wheel rad/sec
 
     public static final double driveSimP = 0.05;
+    public static final double driveSimI = 0;
     public static final double driveSimD = 0.0;
     public static final double driveSimKs = 0.0;
     public static final double driveSimKv = 0.0789;
 
-    public static final double turnMotorReduction = 9424.0 / 203.0; // TODO get actual robot reduction
     public static final DCMotor turnGearbox = DCMotor.getNEO(1);
 
-    public static final double turnEncoderPositionFactor = 2 * Math.PI; // rot -> rad
-    public static final double turnEncoderVelocityFactor = (2 * Math.PI) / 60.0; // RPM -> rad/sec
-
     public static final double turnSimP = 8.0;
+    public static final double turnSimI = 0;
     public static final double turnSimD = 0.0;
-    public static final double turnPIDMinInput = 0; // rad
-    public static final double turnPIDMaxInput = 2 * Math.PI; // rad
 
     private boolean driveClosedLoop = false;
     private boolean turnClosedLoop = false;
 
-    private PIDController driveController = new PIDController(driveSimP, 0, driveSimD);
-    private PIDController turnController = new PIDController(turnSimP, 0, turnSimD);
+    private PIDController driveController = new PIDController(driveSimP, driveSimI, driveSimD);
+    private PIDController turnController = new PIDController(turnSimP, turnSimI, turnSimD);
 
+    // to be updated by sim
     private double driveFFVolts = 0.0;
     private double driveAppliedVolts = 0.0;
     private double turnAppliedVolts = 0.0;
 
     public SDSModuleIOSim() {
         driveSim = new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(driveGearbox, 0.025, driveMotorReduction),
+            LinearSystemId.createDCMotorSystem(driveGearbox, 0.025, SwerveModuleConstants.driveMotorReduction),
             driveGearbox
         );
         turnSim = new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(turnGearbox, 0.004, turnMotorReduction),
+            LinearSystemId.createDCMotorSystem(turnGearbox, 0.004, SwerveModuleConstants.turnMotorReduction),
             turnGearbox
         );
 

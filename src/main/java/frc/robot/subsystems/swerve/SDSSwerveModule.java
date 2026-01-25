@@ -8,7 +8,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Preferences;
-import frc.robot.subsystems.Constants.SwerveConstants;
+import frc.robot.subsystems.Constants.SwerveModuleConstants;
 
 public class SDSSwerveModule {
     public static final NetworkTable constantPreferences = NetworkTableInstance.getDefault().getTable("Swerve Modules");
@@ -34,13 +34,19 @@ public class SDSSwerveModule {
         //     stopDrive();
         //     return;
         // }
-        if(optimize) {
-            state.optimize(inputs.turnPosition);
-            state.cosineScale(inputs.turnPosition);
-        }
+        // if(optimize) {
+        //     state.optimize(inputs.turnPosition);
+        //     state.cosineScale(inputs.turnPosition);
+        // }
         desiredModuleState = state;
         io.setTurnPosition(state.angle);
-        io.setDriveVelocityRadPerSec(state.speedMetersPerSecond / SwerveConstants.kWheelRadiusMeters);
+        io.setDriveVelocityRadPerSec(state.speedMetersPerSecond / SwerveModuleConstants.kSwerveWheelDiameter * 2);
+    }
+
+    /** sets a preset state on the module of 0deg at 1rot/sec */
+    public void setGoofyState() {
+        io.setTurnPosition(new Rotation2d());
+        io.setDriveVelocityRadPerSec(2 * Math.PI);
     }
 
     public SwerveModuleState stopState() {
@@ -59,7 +65,7 @@ public class SDSSwerveModule {
 
     public SwerveModuleState getCurrentState() {
         return new SwerveModuleState(
-            inputs.driveVelocityRadPerSec * SwerveConstants.kWheelRadiusMeters,
+            inputs.driveVelocityWheelMetersPerSec,
             inputs.turnPosition
         );
     }
@@ -70,7 +76,7 @@ public class SDSSwerveModule {
 
     public SwerveModulePosition getPosition() {
         return new SwerveModulePosition(
-            inputs.drivePositionRad * SwerveConstants.kWheelRadiusMeters,
+            inputs.drivePositionRad * SwerveModuleConstants.kSwerveWheelDiameter,
             inputs.turnPosition
         );
     }
@@ -78,7 +84,6 @@ public class SDSSwerveModule {
     public void updateControlConstants() { // don't spam run
         io.updateControlConstants();
     }
-    
 
     public boolean enabled() {
         return Preferences.getBoolean("Swerve Modules/" + name + "enabled", true);

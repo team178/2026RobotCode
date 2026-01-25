@@ -42,6 +42,8 @@ public class Constants {
         kFieldType.setDefaultOption("Welded Field", FieldType.WELDED);
     }
 
+    public static final double odometryFrequency = 50.0; // hz (default)
+
     public static class SwerveConstants {
         public static final int[] turnCANIDs = { 1, 2, 3, 4 };
         public static final int[] driveCANIDs = { 5, 6, 7, 8 };
@@ -83,64 +85,102 @@ public class Constants {
                 return new Pose2d();
             }
         }
-
-		public static double kWheelRadiusMeters = 9;
-        //legacy
     }
 
     public static class SwerveModuleConstants {
-        public static final SparkMaxConfig turnConfig = new SparkMaxConfig();
+        
+        public static final double kSwerveWheelDiameter = Units.inchesToMeters(4);
+        
+        public static final double kMaxSpeed = 0;
+        
+        // drive config
         public static final SparkMaxConfig driveConfig = new SparkMaxConfig();
 
-        public static final double turnP = 0;
-        public static final double turnI = 0;
-        public static final double turnD = 0;
+        public static final double driveMotorReduction = 6.12; // l3 mk4i gear set
+        
+        public static final int driveMotorCurrentLimit = 50;
 
+        public static final double driveEncoderPositionFactor = 2 * Math.PI / driveMotorReduction; // Rotor Rotations -> Wheel Radians
+        public static final double driveEncoderVelocityFactor = (2 * Math.PI) / 60.0 / driveMotorReduction; // Rotor RPM -> Wheel Rad/Sec
+        
         public static final double driveP = 0;
         public static final double driveI = 0;
         public static final double driveD = 0;
         public static final double driveFF = 0;
+        
+        // turn config
+        public static final SparkMaxConfig turnConfig = new SparkMaxConfig();
 
-        public static final double kDriveMotorGearRatio = 6.12; // number of encoder rotations per wheel rotation
-        public static final double kSwerveWheelDiameter = 4; // inches
+        public static final double turnMotorReduction = 150/7;
 
-        public static final double kMaxSpeed = 0;
+        public static final int turnMotorCurrentLimit = 20;
+
+        public static final double turnEncoderPositionFactor = 2 * Math.PI / turnMotorReduction;
+        public static final double turnEncoderVelocityFactor = (2 * Math.PI) / 60.0 / turnMotorReduction;
+        
+        public static final double turnP = 0;
+        public static final double turnI = 0;
+        public static final double turnD = 0;
+
+        public static final double turnPIDMinInput = 0;
+        public static final double turnPIDMaxInput = 2 * Math.PI;
 
         public static final Rotation2d[] zeroRotations = {
-            new Rotation2d(),
-            new Rotation2d(),
-            new Rotation2d(),
-            new Rotation2d()
+            new Rotation2d(Units.rotationsToRadians(0.296)),
+            new Rotation2d(Units.rotationsToRadians(-0.242)),
+            new Rotation2d(Units.rotationsToRadians(-0.459 + 2 * Math.PI)),
+            new Rotation2d(Units.rotationsToRadians(0.372))
         };
 
         static {
             turnConfig
                 .idleMode(IdleMode.kBrake)
                 .smartCurrentLimit(30)
-                .voltageCompensation(12);
-            // turnConfig.closedLoop
-            //     .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-            //     .pid(turnP, turnI, turnD)
-            //     .positionWrappingEnabled(true)
-            //     .positionWrappingInputRange(0, 2 * Math.PI)
-            //     .outputRange(-1,1);
-            // turnConfig.absoluteEncoder
-            //     .positionConversionFactor(2 * Math.PI)
-            //     .velocityConversionFactor(2 * Math.PI);
+                .voltageCompensation(12)
+                .closedLoopRampRate(0.01);
+            turnConfig.encoder
+                .positionConversionFactor(turnEncoderPositionFactor)
+                .velocityConversionFactor(turnEncoderVelocityFactor)
+                .uvwAverageDepth(2);
+            turnConfig.closedLoop
+                .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+                .pid(turnP, turnI, turnD)
+                .positionWrappingEnabled(true)
+                .positionWrappingInputRange(turnPIDMinInput, turnPIDMaxInput)
+                .outputRange(-1,1);
+            turnConfig.signals
+                .absoluteEncoderPositionAlwaysOn(true)
+                .absoluteEncoderPositionPeriodMs((int) (1000.0 / odometryFrequency))
+                .absoluteEncoderVelocityAlwaysOn(true)
+                .absoluteEncoderVelocityPeriodMs(20)
+                .appliedOutputPeriodMs(20)
+                .busVoltagePeriodMs(20)
+                .outputCurrentPeriodMs(20);
 
             driveConfig
                 .idleMode(IdleMode.kBrake)
-                .smartCurrentLimit(30)
-                .voltageCompensation(12)
+                .smartCurrentLimit(driveMotorCurrentLimit)
+                .voltageCompensation(12.0)
                 .closedLoopRampRate(0.01);
+            driveConfig.encoder
+                .positionConversionFactor(driveEncoderPositionFactor)
+                .velocityConversionFactor(driveEncoderVelocityFactor)
+                .uvwMeasurementPeriod(10)
+                .uvwAverageDepth(2);
             driveConfig.closedLoop
-                .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+                .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .pid(driveP, driveI, driveD)
-                .outputRange(-1,1)
-                .feedForward.kV(driveFF);
-            driveConfig.absoluteEncoder
-                .positionConversionFactor(2 * Math.PI)
-                .velocityConversionFactor(2 * Math.PI);
+                .outputRange(-1, 1)
+                .feedForward
+                    .kV(driveFF);
+            driveConfig.signals
+                .primaryEncoderPositionAlwaysOn(true)
+                .primaryEncoderPositionPeriodMs((int) (1000.0 / odometryFrequency))
+                .primaryEncoderVelocityAlwaysOn(true)
+                .primaryEncoderVelocityPeriodMs(20)
+                .appliedOutputPeriodMs(20)
+                .busVoltagePeriodMs(20)
+                .outputCurrentPeriodMs(20);
         }
     }
 
