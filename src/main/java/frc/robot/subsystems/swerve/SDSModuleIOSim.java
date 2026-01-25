@@ -14,27 +14,21 @@ public class SDSModuleIOSim implements SDSModuleIO {
     private final DCMotorSim turnSim;
 
     public static final DCMotor driveGearbox = DCMotor.getNEO(1);
-
-    public static final double driveEncoderPositionFactor = 2 * Math.PI / SwerveModuleConstants.driveMotorReduction; // rotor rotations -> wheel radians
-    public static final double driveEncoderVelocityFactor = (2 * Math.PI) / 60.0 / SwerveModuleConstants.driveMotorReduction; // RPM -> wheel rad/sec
-
-    public static final double driveSimP = 0.05;
-    public static final double driveSimI = 0;
-    public static final double driveSimD = 0.0;
-    public static final double driveSimKs = 0.0;
-    public static final double driveSimKv = 0.0789;
-
     public static final DCMotor turnGearbox = DCMotor.getNEO(1);
-
-    public static final double turnSimP = 8.0;
-    public static final double turnSimI = 0;
-    public static final double turnSimD = 0.0;
 
     private boolean driveClosedLoop = false;
     private boolean turnClosedLoop = false;
 
-    private PIDController driveController = new PIDController(driveSimP, driveSimI, driveSimD);
-    private PIDController turnController = new PIDController(turnSimP, turnSimI, turnSimD);
+    private PIDController driveController = new PIDController(
+        SwerveModuleConstants.driveSimP,
+        SwerveModuleConstants.driveSimI,
+        SwerveModuleConstants.driveSimD
+    );
+    private PIDController turnController = new PIDController(
+        SwerveModuleConstants.turnSimP,
+        SwerveModuleConstants.turnSimI,
+        SwerveModuleConstants.turnSimD
+    );
 
     // to be updated by sim
     private double driveFFVolts = 0.0;
@@ -101,7 +95,7 @@ public class SDSModuleIOSim implements SDSModuleIO {
     @Override
     public void setDriveVelocityRadPerSec(double velocityRadPerSec) {
         driveClosedLoop = true;
-        driveFFVolts = driveSimKs * Math.signum(velocityRadPerSec) + driveSimKv * velocityRadPerSec;
+        driveFFVolts = SwerveModuleConstants.driveSimKs * Math.signum(velocityRadPerSec) + SwerveModuleConstants.driveSimKv * velocityRadPerSec;
         driveController.setSetpoint(velocityRadPerSec);
     }
 

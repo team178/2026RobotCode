@@ -142,7 +142,7 @@ public class SwerveDrive extends SubsystemBase {
             mag = adjustAxisInput(mag, deadband, minThreshold, steepness);
             mag *= SwerveConstants.kMagVelLimit * speedFactor;
             omega = adjustAxisInput(omega, deadband, minThreshold, steepness + 1);
-            omega *= SwerveConstants.kRotVelLimit;
+            omega *= SwerveConstants.kRotVelLimit * speedFactor;
 
             ChassisSpeeds chassisSpeeds = new ChassisSpeeds(mag * Math.cos(dir), mag * Math.sin(dir), omega);    
             
@@ -197,16 +197,11 @@ public class SwerveDrive extends SubsystemBase {
         }, optimize);
     }
 
-    public Command runToggleToXPosition(boolean optimize) {
+    public Command runToggleToXPosition() {
         return runOnce(() -> {
             toX = !toX;
-            System.out.println("tox");
+            Logger.recordOutput("Swerve/toX", toX);
         });
-    }
-
-    @AutoLogOutput(key = "Swerve/toX")
-    public boolean isToX() {
-        return toX;
     }
 
     public Command runZeroGyro() {
@@ -272,7 +267,7 @@ public class SwerveDrive extends SubsystemBase {
             updatedModulePositions[i] = modules[i].getPosition();
             moduleDeltas[i] = new SwerveModulePosition(
                 updatedModulePositions[i].distanceMeters - modulePositions[i].distanceMeters,
-                updatedModulePositions[i].angle.minus(modulePositions[i].angle)
+                updatedModulePositions[i].angle
             );
             modulePositions[i] = updatedModulePositions[i];
             moduleStates[i] = modules[i].getCurrentState();
@@ -287,7 +282,7 @@ public class SwerveDrive extends SubsystemBase {
 
         // record updated positions and update odometry
         Logger.recordOutput("Swerve/Positions", updatedModulePositions);
-        Logger.recordOutput("Swerve/ActualStates", moduleStates);
+        Logger.recordOutput("Swerve/States/Actual", moduleStates);
         poseEstimator.update(rawGyroRotation, updatedModulePositions);
     }
 }

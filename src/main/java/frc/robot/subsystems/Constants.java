@@ -39,10 +39,10 @@ public class Constants {
 
     static {
         kFieldType.setDefaultOption("AndyMark Field", FieldType.ANDYMARK);
-        kFieldType.setDefaultOption("Welded Field", FieldType.WELDED);
+        kFieldType.addOption("Welded Field", FieldType.WELDED);
     }
 
-    public static final double odometryFrequency = 50.0; // hz (default)
+    public static final double odometryFrequency = 50.0; // hz (50 is default of 20ms)
 
     public static class SwerveConstants {
         public static final int[] turnCANIDs = { 1, 2, 3, 4 };
@@ -57,7 +57,7 @@ public class Constants {
         
         public static final double kMaxWheelSpeed = 20; // m/2
         public static final double kMagVelLimit = 5; // m/s -- trusting andy that 5 is physical limit, maybe requires testing
-        public static final double kRotVelLimit = 18; // rad/s
+        public static final double kRotVelLimit = 2 * (2 * Math.PI); // rad/s
 
         public static final double toXDelaySeconds = 1;
 
@@ -88,10 +88,7 @@ public class Constants {
     }
 
     public static class SwerveModuleConstants {
-        
         public static final double kSwerveWheelDiameter = Units.inchesToMeters(4);
-        
-        public static final double kMaxSpeed = 0;
         
         // drive config
         public static final SparkMaxConfig driveConfig = new SparkMaxConfig();
@@ -107,6 +104,12 @@ public class Constants {
         public static final double driveI = 0;
         public static final double driveD = 0;
         public static final double driveFF = 0;
+
+        public static final double driveSimP = 0.05;
+        public static final double driveSimI = 0;
+        public static final double driveSimD = 0.0;
+        public static final double driveSimKs = 0.0;
+        public static final double driveSimKv = 0.0789;
         
         // turn config
         public static final SparkMaxConfig turnConfig = new SparkMaxConfig();
@@ -121,6 +124,10 @@ public class Constants {
         public static final double turnP = 0;
         public static final double turnI = 0;
         public static final double turnD = 0;
+
+        public static final double turnSimP = 8.0;
+        public static final double turnSimI = 0;
+        public static final double turnSimD = 0.0;
 
         public static final double turnPIDMinInput = 0;
         public static final double turnPIDMaxInput = 2 * Math.PI;

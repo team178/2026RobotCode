@@ -34,10 +34,10 @@ public class SDSSwerveModule {
         //     stopDrive();
         //     return;
         // }
-        // if(optimize) {
-        //     state.optimize(inputs.turnPosition);
-        //     state.cosineScale(inputs.turnPosition);
-        // }
+        if (optimize) {
+            state.optimize(inputs.turnPosition);
+            state.cosineScale(inputs.turnPosition);
+        }
         desiredModuleState = state;
         io.setTurnPosition(state.angle);
         io.setDriveVelocityRadPerSec(state.speedMetersPerSecond / SwerveModuleConstants.kSwerveWheelDiameter * 2);
@@ -76,7 +76,7 @@ public class SDSSwerveModule {
 
     public SwerveModulePosition getPosition() {
         return new SwerveModulePosition(
-            inputs.drivePositionRad * SwerveModuleConstants.kSwerveWheelDiameter,
+            inputs.drivePositionRad * SwerveModuleConstants.kSwerveWheelDiameter / 2,
             inputs.turnPosition
         );
     }

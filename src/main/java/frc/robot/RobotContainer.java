@@ -79,11 +79,12 @@ public class RobotContainer {
                 () -> 0 // raw slow input
             )
         );
+        driverController.a().onFalse(swerve.runStopDrive());
 
         // driverController.a().whileTrue(swerve.goofyFunction());
 
         driverController.y().onTrue(swerve.runZeroGyro());
-        driverController.back().onTrue(swerve.runToggleToXPosition(true));
+        driverController.x().onTrue(swerve.runToggleToXPosition());
     }
 
     public void testPeriodic() {
