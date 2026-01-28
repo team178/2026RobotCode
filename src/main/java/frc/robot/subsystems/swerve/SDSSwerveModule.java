@@ -88,6 +88,10 @@ public class SDSSwerveModule {
     public boolean enabled() {
         return Preferences.getBoolean("Swerve Modules/" + name + "enabled", true);
     }
+
+    public void reconfigure() {
+        io.reconfigure();
+    }
     
     public void putInfo() {
         moduleNT.getEntry("desiredspeed").setDouble(desiredModuleState.speedMetersPerSecond);

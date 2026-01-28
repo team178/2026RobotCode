@@ -1,6 +1,7 @@
 package frc.robot.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Preferences;
 import frc.robot.subsystems.Constants.SwerveConstants;
 import frc.robot.subsystems.Constants.SwerveModuleConstants;
 
@@ -9,6 +10,7 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkClosedLoopController; 
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -58,7 +60,7 @@ public class SDSModuleIOSpark implements SDSModuleIO {
         inputs.turnConnected = turnMotor.getFirmwareVersion() != 0;
         inputs.turnPosition = new Rotation2d(
             turnEncoder.getPosition()
-            // - SwerveModuleConstants.zeroRotations[index].getRadians()
+            - SwerveModuleConstants.zeroRotations[index].getRadians()
             // turnCANCoder.getAbsolutePosition().getValueAsDouble() * (2 * Math.PI) - SwerveModuleConstants.zeroRotations[index].getRadians()
         );
         inputs.turnVelocityRadPerSec = turnEncoder.getVelocity();
@@ -73,6 +75,23 @@ public class SDSModuleIOSpark implements SDSModuleIO {
         inputs.driveAppliedVolts = driveMotor.getAppliedOutput() * driveMotor.getBusVoltage();
         inputs.driveCurrentAmps = driveMotor.getOutputCurrent();
     }
+
+    /** dont spam run */
+    public void reconfigure() {
+        double driveP = Preferences.getDouble("driveP", 0.0);
+        double driveI = Preferences.getDouble("driveI", 0.0);
+        double driveD = Preferences.getDouble("driveD", 0.0);
+        double turnP = Preferences.getDouble("turnP", 0.0);
+        double turnI = Preferences.getDouble("turnI", 0.0);
+        double turnD = Preferences.getDouble("turnD", 0.0);
+
+        SwerveModuleConstants.turnConfig.closedLoop.pid(turnP, turnI, turnD);
+        SwerveModuleConstants.driveConfig.closedLoop.pid(driveP, driveI, driveD);
+
+        turnMotor.configure(SwerveModuleConstants.turnConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        driveMotor.configure(SwerveModuleConstants.driveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    }
+    
 
     // TODO make sure that zero rotation is applied correctly, ensure logic is correct
     public void setTurnPosition(Rotation2d position) {

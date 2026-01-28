@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
@@ -131,20 +132,33 @@ public class Constants {
 
         public static final double turnPIDMinInput = 0;
         public static final double turnPIDMaxInput = 2 * Math.PI;
-
+        public static final double[] doubleZeroRotations = {
+            0.296, // fl
+            -0.242, // fr
+            0.041, // bl
+            0.372 // br
+        };
         public static final Rotation2d[] zeroRotations = {
-            new Rotation2d(Units.rotationsToRadians(0.296)),
-            new Rotation2d(Units.rotationsToRadians(-0.242)),
-            new Rotation2d(Units.rotationsToRadians(-0.459 + 2 * Math.PI)),
-            new Rotation2d(Units.rotationsToRadians(0.372))
+            new Rotation2d(Units.rotationsToRadians(doubleZeroRotations[0])),
+            new Rotation2d(Units.rotationsToRadians(doubleZeroRotations[1])),
+            new Rotation2d(Units.rotationsToRadians(doubleZeroRotations[2])),
+            new Rotation2d(Units.rotationsToRadians(doubleZeroRotations[3]))
         };
 
         static {
+            Preferences.initDouble("driveP", driveP);
+            Preferences.initDouble("driveI", driveI);
+            Preferences.initDouble("driveD", driveD);
+            Preferences.initDouble("turnP", turnP);
+            Preferences.initDouble("turnI", turnI);
+            Preferences.initDouble("turnD", turnD);
+
             turnConfig
                 .idleMode(IdleMode.kBrake)
                 .smartCurrentLimit(30)
                 .voltageCompensation(12)
-                .closedLoopRampRate(0.01);
+                .closedLoopRampRate(0.01)
+                .inverted(true);
             turnConfig.encoder
                 .positionConversionFactor(turnEncoderPositionFactor)
                 .velocityConversionFactor(turnEncoderVelocityFactor)

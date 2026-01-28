@@ -247,6 +247,14 @@ public class SwerveDrive extends SubsystemBase {
         });
     }
 
+    public Command runReconfigure() {
+        return runOnce(() -> {
+            for (SDSSwerveModule module : modules) {
+                module.reconfigure();
+            }
+        });
+    }
+
     @Override
     public void periodic() {
         // updated all hardware inputs

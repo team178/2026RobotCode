@@ -39,6 +39,8 @@ public interface SDSModuleIO {
 
     /** Run drive motor at specified open loop value. */
     public default void setDriveOpenLoop(double output) {}
+    
+    public default void reconfigure() {};
 
     /** Update control constants */
     public default void updateControlConstants() {}
