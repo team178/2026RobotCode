@@ -101,10 +101,11 @@ public class Constants {
         public static final double driveEncoderPositionFactor = 2 * Math.PI / driveMotorReduction; // Rotor Rotations -> Wheel Radians
         public static final double driveEncoderVelocityFactor = (2 * Math.PI) / 60.0 / driveMotorReduction; // Rotor RPM -> Wheel Rad/Sec
         
-        public static final double driveP = 0;
+        public static final double driveP = 0.008;
         public static final double driveI = 0;
-        public static final double driveD = 0;
-        public static final double driveFF = 0;
+        public static final double driveD = 0.1;
+        public static final double driveKs = 0.0;
+        public static final double driveKv = 0.12;
 
         public static final double driveSimP = 0.05;
         public static final double driveSimI = 0;
@@ -122,7 +123,7 @@ public class Constants {
         public static final double turnEncoderPositionFactor = 2 * Math.PI / turnMotorReduction;
         public static final double turnEncoderVelocityFactor = (2 * Math.PI) / 60.0 / turnMotorReduction;
         
-        public static final double turnP = 0;
+        public static final double turnP = 1.0;
         public static final double turnI = 0;
         public static final double turnD = 0;
 
@@ -149,6 +150,8 @@ public class Constants {
             Preferences.initDouble("driveP", driveP);
             Preferences.initDouble("driveI", driveI);
             Preferences.initDouble("driveD", driveD);
+            Preferences.initDouble("driveKv", driveKv);
+            Preferences.initDouble("driveKs", driveKs);
             Preferences.initDouble("turnP", turnP);
             Preferences.initDouble("turnI", turnI);
             Preferences.initDouble("turnD", turnD);
@@ -191,9 +194,9 @@ public class Constants {
             driveConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .pid(driveP, driveI, driveD)
-                .outputRange(-1, 1)
-                .feedForward
-                    .kV(driveFF);
+                .outputRange(-1, 1);
+                // .feedForward
+                //     .kV(driveKv);
             driveConfig.signals
                 .primaryEncoderPositionAlwaysOn(true)
                 .primaryEncoderPositionPeriodMs((int) (1000.0 / odometryFrequency))

@@ -1,9 +1,12 @@
 package frc.robot.subsystems.swerve;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Preferences;
 import frc.robot.subsystems.Constants.SwerveConstants;
 import frc.robot.subsystems.Constants.SwerveModuleConstants;
+
+import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.PersistMode;
@@ -11,12 +14,15 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.ClosedLoopSlot;
-import com.revrobotics.spark.SparkClosedLoopController; 
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 public class SDSModuleIOSpark implements SDSModuleIO {
+    private final Rotation2d zeroRotation;
+
     private final SparkMax turnMotor;
     private final SparkMax driveMotor;
 
@@ -28,10 +34,17 @@ public class SDSModuleIOSpark implements SDSModuleIO {
     private final SparkClosedLoopController turnController;
     private final SparkClosedLoopController driveController;
 
+    private double driveKs;
+    private double driveKv;
+
     private final int index;
 
     public SDSModuleIOSpark(int index) {
         this.index = index;
+        this.zeroRotation = SwerveModuleConstants.zeroRotations[index];
+
+        driveKs = SwerveModuleConstants.driveKs;
+        driveKv = SwerveModuleConstants.driveKv;
 
         SparkMaxConfig turnConfig = SwerveModuleConstants.turnConfig;
         SparkMaxConfig driveConfig = SwerveModuleConstants.driveConfig;
@@ -57,12 +70,11 @@ public class SDSModuleIOSpark implements SDSModuleIO {
     }
     
     public void updateInputs(SDSModuleIOInputs inputs) {
+        turnEncoder.setPosition(turnCANCoder.getAbsolutePosition().getValueAsDouble() * (2 * Math.PI));
+
+        // TODO why dont any electrical signals read? (i.e. appliedvolts & currentamps)
         inputs.turnConnected = turnMotor.getFirmwareVersion() != 0;
-        inputs.turnPosition = new Rotation2d(
-            turnEncoder.getPosition()
-            - SwerveModuleConstants.zeroRotations[index].getRadians()
-            // turnCANCoder.getAbsolutePosition().getValueAsDouble() * (2 * Math.PI) - SwerveModuleConstants.zeroRotations[index].getRadians()
-        );
+        inputs.turnPosition = new Rotation2d(turnEncoder.getPosition()).minus(zeroRotation);
         inputs.turnVelocityRadPerSec = turnEncoder.getVelocity();
         inputs.canCoderPosition = turnCANCoder.getAbsolutePosition().getValueAsDouble();
         inputs.turnAppliedVolts = turnMotor.getAppliedOutput() * turnMotor.getBusVoltage();
@@ -81,6 +93,8 @@ public class SDSModuleIOSpark implements SDSModuleIO {
         double driveP = Preferences.getDouble("driveP", 0.0);
         double driveI = Preferences.getDouble("driveI", 0.0);
         double driveD = Preferences.getDouble("driveD", 0.0);
+        driveKs = Preferences.getDouble("driveKs", 0);
+        driveKv = Preferences.getDouble("driveKv", 0);
         double turnP = Preferences.getDouble("turnP", 0.0);
         double turnI = Preferences.getDouble("turnI", 0.0);
         double turnD = Preferences.getDouble("turnD", 0.0);
@@ -95,13 +109,29 @@ public class SDSModuleIOSpark implements SDSModuleIO {
 
     // TODO make sure that zero rotation is applied correctly, ensure logic is correct
     public void setTurnPosition(Rotation2d position) {
-        turnController.setSetpoint(position.getRadians() + SwerveModuleConstants.zeroRotations[index].getRadians(), ControlType.kPosition);
-        // turnController.setSetpoint(0, ControlType.kPosition);
+        double setpoint = MathUtil.inputModulus(
+            position.plus(zeroRotation).getRadians(),
+            SwerveModuleConstants.turnPIDMinInput, SwerveModuleConstants.turnPIDMaxInput
+        );
+        turnController.setSetpoint(setpoint, ControlType.kPosition);
+
+        Logger.recordOutput("Swerve/AppliedData/Module " + index + "/turnSetpointRadians", setpoint);
+        Logger.recordOutput("Swerve/AppliedData/Module " + index + "/atTurnSetpoint", turnController.isAtSetpoint());
     }
 
     public void setDriveVelocityRadPerSec(double velocityRadPerSec) {
-        driveController.setSetpoint(velocityRadPerSec, ControlType.kVelocity);
-        // driveController.setSetpoint(2 * Math.PI, ControlType.kVelocity);
+        if (Math.abs(velocityRadPerSec) < 0.01) velocityRadPerSec = 0;
+        double ffVolts = driveKs * Math.signum(velocityRadPerSec) + driveKv * velocityRadPerSec;
+        driveController.setSetpoint(
+            velocityRadPerSec,
+            ControlType.kVelocity,
+            ClosedLoopSlot.kSlot0,
+            ffVolts,
+            ArbFFUnits.kVoltage
+        );
+
+        Logger.recordOutput("Swerve/AppliedData/Module " + index + "/ffVolts", ffVolts);
+        Logger.recordOutput("Swerve/AppliedData/Module " + index + "/atDriveSetpoint", driveController.isAtSetpoint());
     }
 
     public void setTurnOpenLoop(double output) {
@@ -111,8 +141,4 @@ public class SDSModuleIOSpark implements SDSModuleIO {
     public void setDriveOpenLoop(double output) {
         driveMotor.setVoltage(output);
     }
-
-    // public void updateControlConstants() {
-        
-    // }
 }
