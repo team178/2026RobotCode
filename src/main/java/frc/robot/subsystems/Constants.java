@@ -208,6 +208,12 @@ public class Constants {
         }
     }
 
+    public static class IntakeConstants {
+        public static final int kWristCANID = 14;
+
+        public static final SparkMaxConfig wristConfig = new SparkMaxConfig();
+    }
+
     public static class OperatorConstants {
         public static final int kDriverControllerPort = 0;
         public static final int kAuxControllerPort = 1;
