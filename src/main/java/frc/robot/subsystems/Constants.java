@@ -4,14 +4,17 @@ import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 public class Constants {
     public static enum RobotMode {
@@ -33,15 +36,26 @@ public class Constants {
     }
 
     public static enum FieldType {
-		ANDYMARK, WELDED
+		ANDYMARK("andymark"), WELDED("welded");
+
+        private final String jsonFolder;
+
+        FieldType(String folder) {
+            this.jsonFolder = folder;
+        }
+        
+        public String getJsonFolder() {
+            return jsonFolder;
+        }
 	}
-
-    public static final SendableChooser<FieldType> kFieldType = new SendableChooser<>();
-
-    static {
-        kFieldType.setDefaultOption("AndyMark Field", FieldType.ANDYMARK);
-        kFieldType.addOption("Welded Field", FieldType.WELDED);
-    }
+    
+    public static final FieldType kFieldType = FieldType.ANDYMARK;
+    
+    // public static final SendableChooser<FieldType> kFieldType = new SendableChooser<>();
+    // static {
+    //     kFieldType.setDefaultOption("AndyMark Field", FieldType.ANDYMARK);
+    //     kFieldType.addOption("Welded Field", FieldType.WELDED);
+    // }
 
     public static final double odometryFrequency = 50.0; // hz (50 is default of 20ms)
 
@@ -69,7 +83,7 @@ public class Constants {
          */
         public static Pose2d getInitialPose() {
             if (isRed()) {
-                if (kFieldType.getSelected().equals(FieldType.WELDED)) {
+                if (kFieldType.equals(FieldType.WELDED)) {
                     return new Pose2d(
                         Units.inchesToMeters(651.22),
                         Units.inchesToMeters(317.69),
@@ -94,7 +108,7 @@ public class Constants {
         // drive config
         public static final SparkMaxConfig driveConfig = new SparkMaxConfig();
 
-        public static final double driveMotorReduction = 6.12; // l3 mk4i gear set
+        public static final double driveMotorReduction = 6.75; // l2 mk4i gear set
         
         public static final int driveMotorCurrentLimit = 50;
 
@@ -206,6 +220,76 @@ public class Constants {
                 .busVoltagePeriodMs(20)
                 .outputCurrentPeriodMs(20);
         }
+    }
+
+    public static class VisionConstants {
+        public static record CameraConfig(String name, Transform3d robotToCamera) {}
+
+        public static final CameraConfig cam0config = new CameraConfig("front", new Transform3d());
+        public static final CameraConfig cam1config = new CameraConfig("left", new Transform3d());
+        public static final CameraConfig cam2config = new CameraConfig("back", new Transform3d());
+        public static final CameraConfig cam3config = new CameraConfig("right", new Transform3d());
+        
+        // public enum AprilTagLayoutType {
+        //     OFFICIAL("2026-official"),
+        //     NONE("2026-none");
+            
+        //     AprilTagLayoutType(String name) {
+        //         try {
+        //             layout = new AprilTagFieldLayout(
+        //                 Path.of(
+        //                     Filesystem.getDeployDirectory().getPath(),
+        //                     "apriltags",
+        //                     kFieldType.getJsonFolder(),
+        //                     name + ".json"
+        //                 )
+        //             );
+
+        //             layoutString = new ObjectMapper().writeValueAsString(layout);
+        //         } catch (Exception e) {
+        //             throw new RuntimeException("");
+        //         }
+        //     }
+
+        //     private final AprilTagFieldLayout layout;
+        // }
+
+        // AprilTag layout
+        public static AprilTagFieldLayout aprilTagLayout =
+            AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+
+        // Camera names, must match names configured on coprocessor
+        public static String camera0Name = "camera_0";
+        public static String camera1Name = "camera_1";
+
+        // Robot to camera transforms
+        // (Not used by Limelight, configure in web UI instead)
+        public static Transform3d robotToCamera0 =
+            new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0));
+        public static Transform3d robotToCamera1 =
+            new Transform3d(-0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, Math.PI));
+
+        // Basic filtering thresholds
+        public static double maxAmbiguity = 0.3;
+        public static double maxZError = 0.75;
+
+        // Standard deviation baselines, for 1 meter distance and 1 tag
+        // (Adjusted automatically based on distance and # of tags)
+        public static double linearStdDevBaseline = 0.02; // Meters
+        public static double angularStdDevBaseline = 0.06; // Radians
+
+        // Standard deviation multipliers for each camera
+        // (Adjust to trust some cameras more than others)
+        public static double[] cameraStdDevFactors =
+            new double[] {
+                1.0, // Camera 0
+                1.0 // Camera 1
+            };
+
+        // Multipliers to apply for MegaTag 2 observations
+        public static double linearStdDevMegatag2Factor = 0.5; // More stable than full 3D solve
+        public static double angularStdDevMegatag2Factor =
+            Double.POSITIVE_INFINITY; // No rotation data available
     }
 
     public static class OperatorConstants {
