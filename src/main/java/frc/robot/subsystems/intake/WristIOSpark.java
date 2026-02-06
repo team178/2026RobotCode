@@ -14,16 +14,16 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 public class WristIOSpark implements WristIO {
-    public final SparkMax wristMotor;
-    public final SparkClosedLoopController wristController;
-    public final SparkAbsoluteEncoder wristEncoder;
+    private final SparkMax wristMotor;
+    private final SparkClosedLoopController wristController;
+    private final SparkAbsoluteEncoder wristEncoder;
 
     public WristIOSpark() {
         wristMotor = new SparkMax(IntakeConstants.kWristCANID, MotorType.kBrushless);
         wristController = wristMotor.getClosedLoopController();
         wristEncoder = wristMotor.getAbsoluteEncoder();
 
-        wristMotor.configure(IntakeConstants.wristConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        wristMotor.configure(IntakeConstants.wristSparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     @Override

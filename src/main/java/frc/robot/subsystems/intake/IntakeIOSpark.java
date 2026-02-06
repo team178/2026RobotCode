@@ -11,9 +11,9 @@ import com.revrobotics.spark.SparkMax;
 import frc.robot.subsystems.Constants.IntakeConstants;
 
 public class IntakeIOSpark implements IntakeIO {
-    public final SparkMax intakeMotor;
-    public final SparkClosedLoopController intakeController;
-    public final SparkAbsoluteEncoder intakeEncoder;
+    private final SparkMax intakeMotor;
+    private final SparkClosedLoopController intakeController;
+    private final SparkAbsoluteEncoder intakeEncoder;
 
     public IntakeIOSpark() {
         intakeMotor = new SparkMax(IntakeConstants.kWristCANID, MotorType.kBrushless);
