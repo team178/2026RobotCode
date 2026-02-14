@@ -1,8 +1,10 @@
 package frc.robot.subsystems.swerve;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.controller.PIDController;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -40,6 +42,12 @@ public class SwerveDrive extends SubsystemBase {
     private boolean toX;
     private double lastMove;
 
+    private final AtomicBoolean aimHubFlag;
+
+    private PIDController trajVXController;
+    private PIDController trajVYController;
+    private PIDController trajHeadingController;
+
     private Rotation2d rawGyroRotation;
 
     public SwerveDrive(
@@ -72,7 +80,14 @@ public class SwerveDrive extends SubsystemBase {
         modulePositions = Arrays.stream(modules).map(module -> module.getPosition()).toArray(SwerveModulePosition[]::new);
 
         poseEstimator = new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, modulePositions, SwerveConstants.getInitialPose());
-    
+
+        aimHubFlag = new AtomicBoolean(false);
+
+        trajVXController = new PIDController(10, 0, 0);
+        trajVYController = new PIDController(10, 0, 0);
+        trajHeadingController = new PIDController(5, 0, 0);
+        trajHeadingController.enableContinuousInput(0, 2 * Math.PI);
+
         lastMove = Timer.getFPGATimestamp();
     }
 
@@ -145,12 +160,28 @@ public class SwerveDrive extends SubsystemBase {
             omega *= SwerveConstants.kRotVelLimit * speedFactor;
 
             ChassisSpeeds chassisSpeeds = new ChassisSpeeds(mag * Math.cos(dir), mag * Math.sin(dir), omega);    
-            
-            runChassisSpeeds(chassisSpeeds);
+
+            adjustSpeedsForPresetRotation(chassisSpeeds);
+            submitChassisSpeeds(chassisSpeeds);
         });
     }
 
-    public void runChassisSpeeds(
+    private void adjustSpeedsForPresetRotation(ChassisSpeeds speeds) {
+        if (aimHubFlag.get()) {
+            Pose2d robotPose = getPose();
+            Pose2d hubPose = Constants.FieldConstants.getHubCenter();
+
+            Translation2d robotToHub = hubPose.getTranslation().minus(robotPose.getTranslation());
+            Rotation2d targetHeading = robotToHub.getAngle();
+
+            speeds.omegaRadiansPerSecond = trajHeadingController.calculate(
+                robotPose.getRotation().getRadians(),
+                targetHeading.getRadians()
+            );
+        }
+    }
+
+    private void submitChassisSpeeds(
         ChassisSpeeds chassisSpeeds
     ) {
         if (
@@ -182,13 +213,13 @@ public class SwerveDrive extends SubsystemBase {
         setRawModuleSetpoints(moduleSetpoints, true);
     }
 
-    public void setRawModuleSetpoints(SwerveModuleState[] states, boolean optimize) {
+    private void setRawModuleSetpoints(SwerveModuleState[] states, boolean optimize) {
         for (int i = 0; i < 4; i++) {
             modules[i].setDesiredState(states[i], optimize);
         }
     }
 
-    public void toXPosition(boolean optimize) {
+    private void toXPosition(boolean optimize) {
         setRawModuleSetpoints(new SwerveModuleState[] {
             new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
             new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
@@ -222,6 +253,12 @@ public class SwerveDrive extends SubsystemBase {
         });
     }
 
+    public Command runToggleAimHub() {
+        return runOnce(() -> {
+            aimHubFlag.set(!aimHubFlag.get());
+        });
+    }
+
     @AutoLogOutput(key = "Odometry/Pose")
     public Pose2d getPose() {
         return poseEstimator.getEstimatedPosition();
@@ -230,6 +267,7 @@ public class SwerveDrive extends SubsystemBase {
     public void addVisionMeasurement(Pose2d visionMeasurement, double timestamp, Matrix<N3,N1> stdDevs) {
         // higher standard deviations means vision measurements are trusted less
         poseEstimator.addVisionMeasurement(visionMeasurement, timestamp, stdDevs);
+        getPose();
     }
 
     /** function that tests module motor controllers by giving them a preset state */
@@ -292,5 +330,6 @@ public class SwerveDrive extends SubsystemBase {
         Logger.recordOutput("Swerve/Positions", updatedModulePositions);
         Logger.recordOutput("Swerve/States/Actual", moduleStates);
         poseEstimator.update(rawGyroRotation, updatedModulePositions);
+        getPose();
     }
 }
