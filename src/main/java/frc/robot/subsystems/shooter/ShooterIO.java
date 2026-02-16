@@ -13,9 +13,8 @@ public interface ShooterIO {
         public double driveAppliedVolts = 0;
         public double driveSupplyCurrentAmps = 0;
     }
-    
-    //Set the shooter motor output [-1.0, 1.0] 
-    public default void setVelocityClosedLoop(double output) {} 
+
+    public default void setVelocityClosedLoop(double velocityRadPerSec) {}
 
     //Set the shooter motor voltage input 
     public default void setOpenLoop(double voltage) {} 

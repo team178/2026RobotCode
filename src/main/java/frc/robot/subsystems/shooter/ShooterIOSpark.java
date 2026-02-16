@@ -13,7 +13,7 @@ public class ShooterIOSpark implements ShooterIO {
     }
 
     @Override 
-    public void setVelocityClosedLoop(double output) {
+    public void setVelocityClosedLoop(double velocityRadPerSec) {
         //motor.setControl(new DutyCycleOut(0.0).withOutput(output)); 
     }
 

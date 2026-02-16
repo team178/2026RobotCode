@@ -220,5 +220,8 @@ public class Constants {
         public static final double motorKV = 0.12;
         public static final double motorKS = 0.0;
         public static final double bangBangBoost = 3.0; // volts
+
+        public static final double shooterMotorMaxSpeed = 5; // rad/sec
+        public static final double feederMotorMaxSpeed = 5; // rad/sec
     }
 }
