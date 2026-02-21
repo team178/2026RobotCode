@@ -15,7 +15,7 @@ public interface ClimbIO {
 
     public void updateInputs(ClimbIOInputs inputs);
 
-    public void setSetpoint(double rotations);
+    public void setClosedLoop(double rotations);
 
     public void setOpenLoop(double voltage);
 }

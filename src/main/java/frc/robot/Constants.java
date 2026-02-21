@@ -208,6 +208,25 @@ public class Constants {
         }
     }
 
+    public static class ClimbConstants {
+        public static enum ClimbPose {
+            RETRACTED(1),
+            EXTENDED(0);
+
+            private final double setpoint;
+
+            ClimbPose(double setpoint) {
+                this.setpoint = setpoint;
+            }
+
+            public double getSetpoint() {
+                return setpoint;
+            }
+        }
+
+        public static final int climberMotorCANID = 32;
+    }
+
     public static class OperatorConstants {
         public static final int kDriverControllerPort = 0;
         public static final int kAuxControllerPort = 1;
