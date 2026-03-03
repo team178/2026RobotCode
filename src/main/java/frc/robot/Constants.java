@@ -214,7 +214,9 @@ public class Constants {
     } 
 
     public static class ShooterConstants {
-        public static final int shooterMotorCANID = 14;
+        public static final int shooterLMotorCANID = 14;
+        public static final int shooterMMotorCANID = 14;
+        public static final int shooterRMotorCANID = 14;
         public static final int feederMotorCANID = 15;
 
 //        public static final double motorKP = 0.1;

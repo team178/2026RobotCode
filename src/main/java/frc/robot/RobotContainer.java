@@ -44,7 +44,9 @@ public class RobotContainer {
                     new SDSModuleIOSpark(3)
                 );
                 shooter = new Shooter(
-                    new ShooterIOTalon(ShooterConstants.shooterMotorCANID),
+                    new ShooterIOTalon(ShooterConstants.shooterLMotorCANID),
+                    new ShooterIOTalon(ShooterConstants.shooterMMotorCANID),
+                    new ShooterIOTalon(ShooterConstants.shooterRMotorCANID),
                     new ShooterIOSpark(ShooterConstants.feederMotorCANID)
                 );
                 break;
@@ -58,6 +60,8 @@ public class RobotContainer {
                 );
                 shooter = new Shooter(
                     new ShooterIO() {},
+                    new ShooterIO() {},
+                    new ShooterIO() {},
                     new ShooterIO() {}
                 );
                 break;
@@ -70,6 +74,8 @@ public class RobotContainer {
                     new SDSModuleIO() {}
                 );
                 shooter = new Shooter(
+                    new ShooterIO() {},
+                    new ShooterIO() {},
                     new ShooterIO() {},
                     new ShooterIO() {}
                 );
@@ -92,7 +98,8 @@ public class RobotContainer {
         driverController.b().onTrue(swerve.runReconfigure());
 
         shooter.setDefaultCommand(shooter.runShooterIdle());
-        driverController.rightBumper().whileTrue(shooter.runShootMaxSpeed());
+        driverController.rightBumper().whileTrue(shooter.runShootAtHub(swerve::getPose));
+        driverController.leftBumper().whileTrue(shooter.runShootMaxSpeed());
     }
 
     public void testPeriodic() {
