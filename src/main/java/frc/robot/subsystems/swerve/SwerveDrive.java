@@ -5,6 +5,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.controller.PIDController;
+import frc.robot.subsystems.Constants;
+import frc.robot.subsystems.Constants.FieldConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -26,7 +28,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.robot.subsystems.Constants;
 import frc.robot.subsystems.Constants.SwerveConstants;
 
 public class SwerveDrive extends SubsystemBase {
@@ -169,7 +170,7 @@ public class SwerveDrive extends SubsystemBase {
     private void adjustSpeedsForPresetRotation(ChassisSpeeds speeds) {
         if (aimHubFlag.get()) {
             Pose2d robotPose = getPose();
-            Pose2d hubPose = Constants.FieldConstants.getHubCenter();
+            Pose2d hubPose = FieldConstants.getHubCenter();
 
             Translation2d robotToHub = hubPose.getTranslation().minus(robotPose.getTranslation());
             Rotation2d targetHeading = robotToHub.getAngle();

@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.RobotBase;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 public class Constants {
     public static enum RobotMode {
@@ -66,11 +68,6 @@ public class Constants {
             } else {
                 x = Units.inchesToMeters(181.56);
                 y = Units.inchesToMeters(158.32);
-            }
-
-            if (isRed()) {
-                x = -x;
-                y = -y;
             }
 
             return SwerveConstants.getInitialPose().transformBy(
