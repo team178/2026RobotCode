@@ -20,7 +20,6 @@ import frc.robot.subsystems.swerve.SDSModuleIOSpark;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhoton;
-import frc.robot.subsystems.vision.Vision.VisionConsumer;
 import frc.robot.subsystems.vision.VisionIO;
 
 public class RobotContainer {
@@ -48,9 +47,9 @@ public class RobotContainer {
                 vision = new Vision(
                     swerve::addVisionMeasurement,
                     new VisionIOPhoton(VisionConstants.camConfigs[0]),
-                    new VisionIOPhoton(VisionConstants.camConfigs[1])
-                    // new VisionIOPhoton(VisionConstants.camConfigs[2]),
-                    // new VisionIOPhoton(VisionConstants.camConfigs[3])
+                    new VisionIOPhoton(VisionConstants.camConfigs[1]),
+                    new VisionIOPhoton(VisionConstants.camConfigs[2]),
+                    new VisionIOPhoton(VisionConstants.camConfigs[3])
                 );
                 break;
             case SIM:

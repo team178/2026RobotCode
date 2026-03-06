@@ -12,8 +12,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.RobotBase;
-import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 
 public class Constants {
     public static enum RobotMode {
@@ -248,22 +246,22 @@ public class Constants {
 
         public static final CameraConfig[] camConfigs = {
             new CameraConfig(
-                "front",
+                "photonvision_intake",
                 new Transform3d(),
-                1.0
+                1.2
             ),
             new CameraConfig(
-                "left",
+                "photonvision_shooter",
                 new Transform3d(),
-                1.0
+                0.8
             ),
              new CameraConfig(
-                "back",
+                "photonvision_climber",
                 new Transform3d(),
                 1.0
             ),
             new CameraConfig(
-                "right",
+                "photonvision_shoot_climb",
                 new Transform3d(),
                 1.0
             )
