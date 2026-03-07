@@ -234,13 +234,13 @@ public class Constants {
         public static final double rollerS = 0;
         public static final double rollerV = 0;
 
-        public static enum IntakeWristPost {
+        public static enum IntakeWristPose {
             RETRACTED(0),
             EXTENDED(1);
 
             private final double setpoint;
 
-            IntakeWristPost(double setpoint) {
+            IntakeWristPose(double setpoint) {
                 this.setpoint = setpoint;
             }
 

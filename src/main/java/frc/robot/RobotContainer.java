@@ -10,6 +10,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.Constants;
 import frc.robot.subsystems.Constants.OperatorConstants;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.RollerIO;
+import frc.robot.subsystems.intake.RollerIOSpark;
+import frc.robot.subsystems.intake.WristIO;
+import frc.robot.subsystems.intake.WristIOSpark;
 import frc.robot.subsystems.swerve.GyroIO;
 import frc.robot.subsystems.swerve.GyroIOPigeon;
 import frc.robot.subsystems.swerve.SDSModuleIO;
@@ -22,6 +27,7 @@ public class RobotContainer {
     private final CommandXboxController auxController;
 
     private final SwerveDrive swerve;
+    private final Intake intake;
 
     public RobotContainer() {
         Preferences.removeAll();
@@ -38,6 +44,10 @@ public class RobotContainer {
                     new SDSModuleIOSpark(2),
                     new SDSModuleIOSpark(3)
                 );
+                intake = new Intake(
+                    new RollerIOSpark(),
+                    new WristIOSpark()
+                );
                 break;
             case SIM:
                 swerve = new SwerveDrive(
@@ -46,6 +56,10 @@ public class RobotContainer {
                     new SDSModuleIOSim(),
                     new SDSModuleIOSim(),
                     new SDSModuleIOSim()
+                );
+                intake = new Intake(
+                    new RollerIO() {},
+                    new WristIO() {}
                 );
                 break;
             default:
@@ -56,6 +70,10 @@ public class RobotContainer {
                     new SDSModuleIO() {},
                     new SDSModuleIO() {}
                 );
+                intake = new Intake(
+                    new RollerIO() {},
+                    new WristIO() {}
+                );
                 break;
         }
 
@@ -63,19 +81,22 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        swerve.setDefaultCommand(swerve.runDriveInputs(
-            driverController::getLeftX, // vx
-            driverController::getLeftY, // vy
-            driverController::getRightX, // omega
-            driverController::getRightTriggerAxis // raw slow input
-        ));
+//        swerve.setDefaultCommand(swerve.runDriveInputs(
+//            driverController::getLeftX, // vx
+//            driverController::getLeftY, // vy
+//            driverController::getRightX, // omega
+//            driverController::getRightTriggerAxis // raw slow input
+//        ));
 
         // driverController.a().whileTrue(swerve.goofyFunction());
         // driverController.a().onFalse(swerve.runStopDrive());
 
-        driverController.y().onTrue(swerve.runZeroGyro());
-        driverController.x().onTrue(swerve.runToggleToXPosition());
-        driverController.b().onTrue(swerve.runReconfigure());
+//        driverController.y().onTrue(swerve.runZeroGyro());
+//        driverController.x().onTrue(swerve.runToggleToXPosition());
+//        driverController.b().onTrue(swerve.runReconfigure());
+
+        intake.setDefaultCommand(intake.runStop());
+        driverController.rightBumper().whileTrue(intake.runJustWrist());
     }
 
     public void testPeriodic() {
