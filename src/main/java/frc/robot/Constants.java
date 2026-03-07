@@ -1,6 +1,8 @@
 package frc.robot;
 
 import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
@@ -208,6 +210,12 @@ public class Constants {
         }
     }
 
+    public static class FieldConstants {
+        public static Pose2d getHubCenter() {
+            return new Pose2d();
+        }
+    }
+
     public static class OperatorConstants {
         public static final int kDriverControllerPort = 0;
         public static final int kAuxControllerPort = 1;
@@ -219,15 +227,57 @@ public class Constants {
         public static final int shooterRMotorCANID = 14;
         public static final int feederMotorCANID = 15;
 
-//        public static final double motorKP = 0.1;
-//        public static final double motorKI = 0.0;
-//        public static final double motorKD = 0.0;
-        public static final double motorKV = 0.12;
-        public static final double motorKS = 0.0;
-        public static final double bangBangBoost = 3.0; // volts
-
         public static final double shooterMotorMaxSpeed = 5; // rad/sec
         public static final double feederMotorMaxSpeed = 5; // rad/sec
-        public static final double idleMult = 0.3;
+        public static final double idleMult = 0.4;
+
+        public static final double kP = 0.4;
+        public static final double kD = 0;
+        public static final double kS = 0;
+        public static final double kV = 0.12;
+
+        public static final double feederkP = 0.4;
+        public static final double feederkD = 0;
+        public static final double feederkS = 0;
+        public static final double feederkV = 0.12;
+
+        public static final double mmCruise = 80;
+        public static final double mmAcceleration = 160;
+        public static final double mmJerk = 1600;
+
+        public static final SparkMaxConfig feederConfig = new SparkMaxConfig();
+
+        public static final double feederMotorReduction = 3.0 / 1.0;
+        public static final double feederEncoderPositionFactor = 2 * Math.PI / feederMotorReduction;
+        public static final double feederEncoderVelocityFactor = (2 * Math.PI) / 60.0 / feederMotorReduction;
+
+        static {
+            feederConfig
+                .idleMode(IdleMode.kCoast)
+                .smartCurrentLimit(30)
+                .voltageCompensation(12)
+                .closedLoopRampRate(0.01)
+                .inverted(false); // i hope not ❤️
+            feederConfig.encoder
+                .positionConversionFactor(feederEncoderPositionFactor)
+                .positionConversionFactor(feederEncoderVelocityFactor)
+                .uvwAverageDepth(2);
+            feederConfig.closedLoop
+                .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+                .pid(feederkP, 0, feederkD)
+                .positionWrappingEnabled(true)
+                .positionWrappingInputRange(0, 2 * Math.PI)
+                .outputRange(-1,1);
+            feederConfig.closedLoop.feedForward
+                .kS(feederkS).kV(feederkV);
+            feederConfig.signals
+                .absoluteEncoderPositionAlwaysOn(true)
+                .absoluteEncoderPositionPeriodMs((int) (1000.0 / odometryFrequency))
+                .absoluteEncoderVelocityAlwaysOn(true)
+                .absoluteEncoderVelocityPeriodMs(20)
+                .appliedOutputPeriodMs(20)
+                .busVoltagePeriodMs(20)
+                .outputCurrentPeriodMs(20);
+        }
     }
 }

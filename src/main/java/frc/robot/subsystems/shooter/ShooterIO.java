@@ -7,11 +7,11 @@ public interface ShooterIO {
     @AutoLog
     public static class ShooterIOInputs {
         // Currents shooter speed in radians/sec
-        public double driveVelocityRadPerSec = 0;
+        public double velocityRadPerSec = 0;
 
         // Motor applied voltage and current
-        public double driveAppliedVolts = 0;
-        public double driveSupplyCurrentAmps = 0;
+        public double appliedVolts = 0;
+        public double supplyCurrentAmps = 0;
     }
 
     public default void setVelocityClosedLoop(double velocityRadPerSec) {}

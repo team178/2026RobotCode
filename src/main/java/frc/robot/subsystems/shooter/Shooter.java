@@ -1,11 +1,11 @@
 package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.ShooterConstants;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;
 
@@ -14,6 +14,8 @@ public class Shooter extends SubsystemBase {
     private final ShooterIO shooterIOM;
     private final ShooterIO shooterIOR;
     private final ShooterIO feederIO;
+
+    private final ShooterIOInputsAutoLogged[] shooterInputs = new ShooterIOInputsAutoLogged[4];
 
     public Shooter(ShooterIO shooterIOL, ShooterIO shooterIOM, ShooterIO shooterIOR, ShooterIO feederIO) {
         this.shooterIOL = shooterIOL;
@@ -70,12 +72,24 @@ public class Shooter extends SubsystemBase {
     public Command runShootAtHub(Supplier<Pose2d> poseSupplier) {
         return run(() -> {
             Pose2d robotPose = poseSupplier.get();
-//            Pose2d hubPose = FieldConstants.getHubCenter();
-            Pose2d hubPose = new Pose2d();
+            Pose2d hubPose = FieldConstants.getHubCenter();
 
             double hubDistance = robotPose.getTranslation().getDistance(hubPose.getTranslation());
 
             shootWithDistance(hubDistance);
         });
+    }
+
+    @Override
+    public void periodic() {
+        shooterIOL.updateInputs(shooterInputs[0]);
+        shooterIOM.updateInputs(shooterInputs[1]);
+        shooterIOR.updateInputs(shooterInputs[2]);
+        feederIO.updateInputs(shooterInputs[3]);
+
+        Logger.processInputs("Shooter/RightShooter", shooterInputs[0]);
+        Logger.processInputs("Shooter/MiddleShooter", shooterInputs[1]);
+        Logger.processInputs("Shooter/LeftShooter", shooterInputs[2]);
+        Logger.processInputs("Shooter/Feeder", shooterInputs[3]);
     }
 }
