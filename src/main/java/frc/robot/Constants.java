@@ -159,7 +159,7 @@ public class Constants {
 
             turnConfig
                 .idleMode(IdleMode.kBrake)
-                .smartCurrentLimit(30)
+                .smartCurrentLimit(turnMotorCurrentLimit)
                 .voltageCompensation(12)
                 .closedLoopRampRate(0.01)
                 .inverted(true);
@@ -196,8 +196,6 @@ public class Constants {
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .pid(driveP, driveI, driveD)
                 .outputRange(-1, 1);
-                // .feedForward
-                //     .kV(driveKv);
             driveConfig.signals
                 .primaryEncoderPositionAlwaysOn(true)
                 .primaryEncoderPositionPeriodMs((int) (1000.0 / odometryFrequency))
