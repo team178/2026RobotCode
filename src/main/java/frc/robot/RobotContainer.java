@@ -90,20 +90,21 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        swerve.setDefaultCommand(swerve.runDriveInputs(
-            driverController::getLeftX, // vx
-            driverController::getLeftY, // vy
-            driverController::getRightX, // omega
-            driverController::getRightTriggerAxis // raw slow input
-        ));
+//        swerve.setDefaultCommand(swerve.runDriveInputs(
+//            driverController::getLeftX, // vx
+//            driverController::getLeftY, // vy
+//            driverController::getRightX, // omega
+//            driverController::getRightTriggerAxis // raw slow input
+//        ));
 
-        driverController.y().onTrue(swerve.runZeroGyro());
-        driverController.x().onTrue(swerve.runToggleToXPosition());
-        driverController.b().onTrue(swerve.runReconfigure());
+//        driverController.y().onTrue(swerve.runZeroGyro());
+//        driverController.x().onTrue(swerve.runToggleToXPosition());
+//        driverController.b().onTrue(swerve.runReconfigure());
 
-        shooter.setDefaultCommand(shooter.runShooterIdle());
-        driverController.rightBumper().whileTrue(shooter.runShootAtHub(swerve::getPose));
-        driverController.leftBumper().whileTrue(shooter.runShootMaxSpeed());
+        shooter.setDefaultCommand(shooter.runStopShooter());
+        driverController.rightBumper().whileTrue(shooter.runShootOneShooter());
+//        driverController.rightBumper().whileTrue(shooter.runShootAtHub(swerve::getPose));
+//        driverController.leftBumper().whileTrue(shooter.runShootMaxSpeed());
     }
 
     public void testPeriodic() {

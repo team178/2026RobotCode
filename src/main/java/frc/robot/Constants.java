@@ -231,6 +231,7 @@ public class Constants {
         public static final double shooterMotorMaxSpeed = 5; // rad/sec
         public static final double feederMotorMaxSpeed = 5; // rad/sec
         public static final double idleMult = 0.4;
+        public static final double feederMotorMult = 0.3;
 
         public static final double kP = 0.4;
         public static final double kD = 0;

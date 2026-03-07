@@ -14,6 +14,8 @@ public interface ShooterIO {
         public double supplyCurrentAmps = 0;
     }
 
+    public default void periodic() {}
+
     public default void setVelocityClosedLoop(double velocityRadPerSec) {}
 
     //Set the shooter motor voltage input 

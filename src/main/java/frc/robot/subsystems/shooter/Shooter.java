@@ -5,7 +5,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.util.HubShootLUT;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import java.util.function.Supplier;
 
@@ -15,6 +17,8 @@ public class Shooter extends SubsystemBase {
     private final ShooterIO shooterIOR;
     private final ShooterIO feederIO;
     private final ShooterIO indexIO;
+
+    private final LoggedNetworkNumber loggedRadPerSec = new LoggedNetworkNumber("Shooter/Tuning/Setpoint", ShooterConstants.kP);
 
     private final ShooterIOInputsAutoLogged[] shooterInputs = new ShooterIOInputsAutoLogged[5];
 
@@ -26,17 +30,9 @@ public class Shooter extends SubsystemBase {
         this.indexIO = indexIO;
     }
 
-    private double shooterMotorRegressionDistanceToVelocityRadPerSec(double distanceMeters) {
-        return distanceMeters; // TODO update regression
-    }
-
-    private double feederMotorRegressionDistanceToVelocityRadPerSec(double distanceMeters) {
-        return distanceMeters; // TODO update regression
-    }
-
     private void shootWithDistance(double distanceMeters) {
-        double shooterVelocityRadPerSec = shooterMotorRegressionDistanceToVelocityRadPerSec(distanceMeters);
-        double feederVelocityRadPerSec = feederMotorRegressionDistanceToVelocityRadPerSec(distanceMeters);
+        double shooterVelocityRadPerSec = HubShootLUT.getFlywheelSpeedAtDistance(distanceMeters);
+        double feederVelocityRadPerSec = shooterVelocityRadPerSec * ShooterConstants.feederMotorMult;
 
         shooterIOL.setVelocityClosedLoop(shooterVelocityRadPerSec);
         shooterIOM.setVelocityClosedLoop(shooterVelocityRadPerSec);
@@ -46,7 +42,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public Command runStopShooter() {
-        return runOnce(() -> {
+        return run(() -> {
             shooterIOL.stop();
             shooterIOM.stop();
             shooterIOR.stop();
@@ -86,8 +82,20 @@ public class Shooter extends SubsystemBase {
         });
     }
 
+    public Command runShootOneShooter() {
+        return run(() -> {
+            shooterIOL.setVelocityClosedLoop(loggedRadPerSec.get());
+        });
+    }
+
     @Override
     public void periodic() {
+        shooterIOL.periodic();
+        shooterIOM.periodic();
+        shooterIOR.periodic();
+        feederIO.periodic();
+        indexIO.periodic();
+
         shooterIOL.updateInputs(shooterInputs[0]);
         shooterIOM.updateInputs(shooterInputs[1]);
         shooterIOR.updateInputs(shooterInputs[2]);
