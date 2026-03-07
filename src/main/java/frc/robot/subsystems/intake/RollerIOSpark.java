@@ -10,31 +10,31 @@ import com.revrobotics.spark.SparkMax;
 
 import frc.robot.subsystems.Constants.IntakeConstants;
 
-public class IntakeIOSpark implements IntakeIO {
+public class RollerIOSpark implements RollerIO {
     private final SparkMax intakeMotor;
     private final SparkClosedLoopController intakeController;
     private final SparkAbsoluteEncoder intakeEncoder;
 
-    public IntakeIOSpark() {
+    public RollerIOSpark() {
         intakeMotor = new SparkMax(IntakeConstants.kWristCANID, MotorType.kBrushless);
         intakeController = intakeMotor.getClosedLoopController();
         intakeEncoder = intakeMotor.getAbsoluteEncoder();
 
-        intakeMotor.configure(IntakeConstants.intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        intakeMotor.configure(IntakeConstants.rollerSparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     @Override
     public void updateInputs(IntakeIOInputs inputs) {
-        inputs.positionMeters = intakeEncoder.getPosition();
-        inputs.velocityMetersPerSec = intakeEncoder.getVelocity();
+        inputs.positionRad = intakeEncoder.getPosition();
+        inputs.velocityRadPerSec = intakeEncoder.getVelocity();
 
         inputs.appliedVolts = intakeMotor.getBusVoltage();
         inputs.currentAmps = intakeMotor.getOutputCurrent();
     }
 
     @Override
-    public void setClosedLoop(double voltage) {
-        intakeController.setSetpoint(voltage, ControlType.kVoltage);
+    public void setClosedLoop(double velocityRadPerSec) {
+        intakeController.setSetpoint(velocityRadPerSec, ControlType.kVelocity);
     }
 
     @Override

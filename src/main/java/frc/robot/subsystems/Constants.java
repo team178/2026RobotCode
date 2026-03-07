@@ -1,7 +1,5 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -214,33 +212,35 @@ public class Constants {
         public static final int kWristCANID = 14;
 
         public static final SparkMaxConfig wristSparkConfig = new SparkMaxConfig();
-        public static final TalonFXConfiguration wristTalonConfig = new TalonFXConfiguration();
-        public static final SparkMaxConfig intakeConfig = new SparkMaxConfig();
+        public static final SparkMaxConfig rollerSparkConfig = new SparkMaxConfig();
 
-        public static final double intakeVoltage = 6;
+        public static final double intakeMaxSpeed = 6; // rad/sec
 
-        public static final double wristMotorReduction = 1;
+        public static final double wristMotorReduction = 32.0 / 1.0;
+        public static final double rollerMotorReduction = 2.0 / 1.0;
 
         public static final double wristEncoderPositionFactor = 2 * Math.PI / wristMotorReduction;
         public static final double wristEncoderVelocityFactor = (2 * Math.PI) / wristMotorReduction / 60;
+        public static final double rollerEncoderPositionFactor = 2 * Math.PI / rollerMotorReduction;
+        public static final double rollerEncoderVelocityFactor = (2 * Math.PI) / rollerMotorReduction / 60;
 
         public static final double wristP = 0;
-        public static final double wristI = 0;
         public static final double wristD = 0;
-        public static final double wristG = 0;
+        public static final double wristCos = 0;
         public static final double wristS = 0;
-        public static final double wristV = 0;
 
-        public static final double wristPIDMinInput = 0;
-        public static final double wristPIDMaxInput = 0;
+        public static final double rollerP = 0;
+        public static final double rollerD = 0;
+        public static final double rollerS = 0;
+        public static final double rollerV = 0;
 
-        public static enum IntakePose {
+        public static enum IntakeWristPost {
             RETRACTED(0),
             EXTENDED(1);
 
             private final double setpoint;
 
-            IntakePose(double setpoint) {
+            IntakeWristPost(double setpoint) {
                 this.setpoint = setpoint;
             }
 
@@ -253,7 +253,6 @@ public class Constants {
             wristSparkConfig
                 .idleMode(IdleMode.kBrake)
                 .voltageCompensation(12)
-                .closedLoopRampRate(0.01)
                 .inverted(false);
             wristSparkConfig.encoder
                 .positionConversionFactor(wristEncoderPositionFactor)
@@ -261,10 +260,12 @@ public class Constants {
                 .uvwAverageDepth(2);
             wristSparkConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                .pid(wristP, wristI, wristD)
+                .pid(wristP, 0.0, wristD)
                 .positionWrappingEnabled(true)
-                .positionWrappingInputRange(wristPIDMinInput, wristPIDMaxInput)
+                .positionWrappingInputRange(0, 2 * Math.PI)
                 .outputRange(-1,1);
+            wristSparkConfig.closedLoop.feedForward
+                .kCos(wristCos).kS(wristS);
             wristSparkConfig.signals
                 .absoluteEncoderPositionAlwaysOn(true)
                 .absoluteEncoderPositionPeriodMs((int) (1000.0 / odometryFrequency))
@@ -273,18 +274,30 @@ public class Constants {
                 .appliedOutputPeriodMs(20)
                 .busVoltagePeriodMs(20)
                 .outputCurrentPeriodMs(20);
-            
-            wristTalonConfig.Slot0.kP = wristP;
-            wristTalonConfig.Slot0.kI = wristI;
-            wristTalonConfig.Slot0.kD = wristD;
-            wristTalonConfig.Slot0.kS = 0.25; 
-            wristTalonConfig.Slot0.kV = 1.2; 
-            wristTalonConfig.Slot0.kG = 0.5; // the voltage that holds the arm completely horizontal
-            wristTalonConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
 
-            wristTalonConfig.MotionMagic.MotionMagicCruiseVelocity = 80; // rps
-            wristTalonConfig.MotionMagic.MotionMagicAcceleration = 160; // rps/s
-            wristTalonConfig.MotionMagic.MotionMagicJerk = 10.0; // rps/s/s
+            rollerSparkConfig
+                .idleMode(IdleMode.kBrake)
+                .voltageCompensation(12)
+                .closedLoopRampRate(0.02)
+                .inverted(false);
+            rollerSparkConfig.encoder
+                .positionConversionFactor(rollerEncoderPositionFactor)
+                .velocityConversionFactor(rollerEncoderVelocityFactor)
+                .uvwAverageDepth(2);
+            rollerSparkConfig.closedLoop
+                .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+                .pid(rollerP, 0.0, rollerD)
+                .outputRange(-1,1);
+            rollerSparkConfig.closedLoop.feedForward
+                .kV(rollerV).kS(rollerS);
+            rollerSparkConfig.signals
+                .absoluteEncoderPositionAlwaysOn(true)
+                .absoluteEncoderPositionPeriodMs((int) (1000.0 / odometryFrequency))
+                .absoluteEncoderVelocityAlwaysOn(true)
+                .absoluteEncoderVelocityPeriodMs(20)
+                .appliedOutputPeriodMs(20)
+                .busVoltagePeriodMs(20)
+                .outputCurrentPeriodMs(20);
         }
     }
 
