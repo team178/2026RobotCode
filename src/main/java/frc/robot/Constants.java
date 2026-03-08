@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot;
 
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -51,8 +51,8 @@ public class Constants {
         public static final int[] canCoderCANIDs = { 9, 10, 11, 12 };
         public static final int pigeonCANID = 13;
 
-        public static final double kWheelDistanceMetersX = Units.inchesToMeters(20); // forward/back
-        public static final double kWheelDistanceMetersY = Units.inchesToMeters(20); // left/right
+        public static final double kWheelDistanceMetersX = Units.inchesToMeters(25 - 5.25); // forward/back
+        public static final double kWheelDistanceMetersY = Units.inchesToMeters(29 - 5.25); // left/right
 
         public static final double kSlowedMult = 0.12;
         
@@ -101,11 +101,11 @@ public class Constants {
         public static final double driveEncoderPositionFactor = 2 * Math.PI / driveMotorReduction; // Rotor Rotations -> Wheel Radians
         public static final double driveEncoderVelocityFactor = (2 * Math.PI) / 60.0 / driveMotorReduction; // Rotor RPM -> Wheel Rad/Sec
         
-        public static final double driveP = 0.008;
+        public static final double driveP = 0.0001;
         public static final double driveI = 0;
-        public static final double driveD = 0.1;
-        public static final double driveKs = 0.0;
-        public static final double driveKv = 0.12;
+        public static final double driveD = 0;
+        public static final double driveKs = 0.01;
+        public static final double driveKv = 0.11;
 
         public static final double driveSimP = 0.05;
         public static final double driveSimI = 0;
@@ -123,7 +123,7 @@ public class Constants {
         public static final double turnEncoderPositionFactor = 2 * Math.PI / turnMotorReduction;
         public static final double turnEncoderVelocityFactor = (2 * Math.PI) / 60.0 / turnMotorReduction;
         
-        public static final double turnP = 1.0;
+        public static final double turnP = 0.6;
         public static final double turnI = 0;
         public static final double turnD = 0;
 
@@ -134,10 +134,10 @@ public class Constants {
         public static final double turnPIDMinInput = 0;
         public static final double turnPIDMaxInput = 2 * Math.PI;
         public static final double[] doubleZeroRotations = {
-            0.296, // fl
-            -0.242, // fr
-            0.041, // bl
-            0.372 // br
+            0.048, // fl
+            -0.464, // fr
+            0.051, // bl
+            0.353 // br
         };
         public static final Rotation2d[] zeroRotations = {
             new Rotation2d(Units.rotationsToRadians(doubleZeroRotations[0])),
@@ -158,7 +158,7 @@ public class Constants {
 
             turnConfig
                 .idleMode(IdleMode.kBrake)
-                .smartCurrentLimit(30)
+                .smartCurrentLimit(turnMotorCurrentLimit)
                 .voltageCompensation(12)
                 .closedLoopRampRate(0.01)
                 .inverted(true);
@@ -195,8 +195,6 @@ public class Constants {
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .pid(driveP, driveI, driveD)
                 .outputRange(-1, 1);
-                // .feedForward
-                //     .kV(driveKv);
             driveConfig.signals
                 .primaryEncoderPositionAlwaysOn(true)
                 .primaryEncoderPositionPeriodMs((int) (1000.0 / odometryFrequency))
