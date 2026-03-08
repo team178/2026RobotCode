@@ -75,12 +75,23 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-         climb.setDefaultCommand(
+        swerve.setDefaultCommand(swerve.runDriveInputs(
+            driverController::getLeftX, // vx
+            driverController::getLeftY, // vy
+            driverController::getRightX, // omega
+            driverController::getRightTriggerAxis // raw slow input
+        ));
+
+        driverController.y().onTrue(swerve.runZeroGyro());
+        driverController.x().onTrue(swerve.runToggleToXPosition());
+        driverController.b().onTrue(swerve.runReconfigure());
+        
+        climb.setDefaultCommand(
              climb.runClimb(
                  driverController.rightBumper()::getAsBoolean,
                  driverController.leftBumper()::getAsBoolean
              )
-         );
+        );
     }
 
     public void testPeriodic() {
