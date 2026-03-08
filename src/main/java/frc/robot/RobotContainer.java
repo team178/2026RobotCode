@@ -95,8 +95,8 @@ public class RobotContainer {
 //        driverController.x().onTrue(swerve.runToggleToXPosition());
 //        driverController.b().onTrue(swerve.runReconfigure());
 
-        intake.setDefaultCommand(intake.runStop());
-        driverController.rightBumper().whileTrue(intake.runJustWrist());
+        driverController.rightBumper().whileTrue(intake.runIntake());
+        driverController.rightBumper().whileFalse(intake.runStop());
     }
 
     public void testPeriodic() {

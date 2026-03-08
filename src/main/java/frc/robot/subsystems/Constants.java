@@ -209,7 +209,8 @@ public class Constants {
     }
 
     public static class IntakeConstants {
-        public static final int kWristCANID = 14;
+        public static final int kWristCANID = 28;
+        public static final int kRollerCANID = 29;
 
         public static final SparkMaxConfig wristSparkConfig = new SparkMaxConfig();
         public static final SparkMaxConfig rollerSparkConfig = new SparkMaxConfig();
@@ -276,10 +277,10 @@ public class Constants {
                 .outputCurrentPeriodMs(20);
 
             rollerSparkConfig
-                .idleMode(IdleMode.kBrake)
+                .idleMode(IdleMode.kCoast)
                 .voltageCompensation(12)
                 .closedLoopRampRate(0.02)
-                .inverted(false);
+                .inverted(true);
             rollerSparkConfig.encoder
                 .positionConversionFactor(rollerEncoderPositionFactor)
                 .velocityConversionFactor(rollerEncoderVelocityFactor)

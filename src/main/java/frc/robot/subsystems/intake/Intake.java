@@ -2,15 +2,21 @@ package frc.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.Constants.IntakeConstants;
 import frc.robot.subsystems.Constants.IntakeConstants.IntakeWristPose;
+
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class Intake extends SubsystemBase {
     public final RollerIO rollerIO;
     public final WristIO wristIO;
 
-    LoggedDashboardChooser<IntakeWristPose> poseChooser = new LoggedDashboardChooser("Intake/Wrist/Pose");
+    private RollerIOInputsAutoLogged rollerInputs = new RollerIOInputsAutoLogged();
+    private WristIOInputsAutoLogged wristInputs = new WristIOInputsAutoLogged();
+
+    LoggedDashboardChooser<IntakeWristPose> poseChooser = new LoggedDashboardChooser<>("Intake/Wrist/Pose");
+    LoggedNetworkNumber speed = new LoggedNetworkNumber("Intake/Roller/Speed", 6);
 
     public Intake(RollerIO rollerIO, WristIO wristIO) {
         this.rollerIO = rollerIO;
@@ -25,7 +31,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void intake() {
-        rollerIO.setClosedLoop(IntakeConstants.intakeMaxSpeed);
+        rollerIO.setClosedLoop(speed.get());
     }
 
     public void stopIntake() {
@@ -44,7 +50,8 @@ public class Intake extends SubsystemBase {
 
     public Command runJustWrist() {
         return run(() -> {
-            setPose(poseChooser.get());
+            // setPose(poseChooser.get());
+            wristIO.setOpenLoop(-1.0);
         });
     }
 
@@ -59,5 +66,11 @@ public class Intake extends SubsystemBase {
     public void periodic() {
         rollerIO.periodic();
         wristIO.periodic();
+
+        wristIO.updateInputs(wristInputs);
+        rollerIO.updateInputs(rollerInputs);
+
+        Logger.processInputs("Intake/Wrist", wristInputs);
+        Logger.processInputs("Intake/Roller", rollerInputs);
     }
 }

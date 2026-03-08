@@ -1,7 +1,10 @@
 package frc.robot.subsystems.intake;
 
 import com.revrobotics.PersistMode;
+import com.revrobotics.REVLibError;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -11,12 +14,14 @@ import com.revrobotics.spark.SparkMax;
 
 import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.subsystems.Constants.IntakeConstants;
+
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class RollerIOSpark implements RollerIO {
     private final SparkMax intakeMotor;
     private final SparkClosedLoopController intakeController;
-    private final SparkAbsoluteEncoder intakeEncoder;
+    private final RelativeEncoder intakeEncoder;
     private final SparkMaxConfig motorConfig;
 
     private final LoggedNetworkNumber loggedKP = new LoggedNetworkNumber("Intake/Roller/kP", IntakeConstants.rollerP);
@@ -30,9 +35,9 @@ public class RollerIOSpark implements RollerIO {
     private double lastKv = 0.0;
 
     public RollerIOSpark() {
-        intakeMotor = new SparkMax(IntakeConstants.kWristCANID, MotorType.kBrushless);
+        intakeMotor = new SparkMax(IntakeConstants.kRollerCANID, MotorType.kBrushless);
         intakeController = intakeMotor.getClosedLoopController();
-        intakeEncoder = intakeMotor.getAbsoluteEncoder();
+        intakeEncoder = intakeMotor.getEncoder();
 
         motorConfig = IntakeConstants.rollerSparkConfig;
 
@@ -54,9 +59,9 @@ public class RollerIOSpark implements RollerIO {
         if (currentKp != lastKp || currentKd != lastKd || currentKs != lastKs || currentKv != lastKv) {
 
             motorConfig.closedLoop
-                .pid(IntakeConstants.rollerP, 0.0, IntakeConstants.rollerD);
+                .pid(currentKp, 0.0, currentKd);
             motorConfig.closedLoop.feedForward
-                .kV(IntakeConstants.rollerV).kS(IntakeConstants.rollerS);
+                .kV(currentKv).kS(currentKs);
 
             intakeMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
 
@@ -70,17 +75,19 @@ public class RollerIOSpark implements RollerIO {
     }
 
     @Override
-    public void updateInputs(IntakeIOInputs inputs) {
+    public void updateInputs(RollerIOInputs inputs) {
         inputs.positionRad = intakeEncoder.getPosition();
         inputs.velocityRadPerSec = intakeEncoder.getVelocity();
 
-        inputs.appliedVolts = intakeMotor.getBusVoltage();
+        inputs.appliedVolts = intakeMotor.getBusVoltage() * intakeMotor.getAppliedOutput();
         inputs.currentAmps = intakeMotor.getOutputCurrent();
     }
 
     @Override
     public void setClosedLoop(double velocityRadPerSec) {
-        intakeController.setSetpoint(velocityRadPerSec, ControlType.kVelocity);
+        intakeController.setSetpoint(velocityRadPerSec, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
+
+        Logger.recordOutput("Intake/Roller/Setpoint", velocityRadPerSec);
     }
 
     @Override

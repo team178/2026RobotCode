@@ -1,24 +1,24 @@
 package frc.robot.subsystems.intake;
 
 import com.revrobotics.PersistMode;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkAbsoluteEncoder;
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
-
-import com.revrobotics.spark.config.SparkMaxConfig;
-import frc.robot.subsystems.Constants.IntakeConstants;
-
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.subsystems.Constants.IntakeConstants;
+
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class WristIOSpark implements WristIO {
     private final SparkMax wristMotor;
     private final SparkClosedLoopController wristController;
-    private final SparkAbsoluteEncoder wristEncoder;
+    private final RelativeEncoder wristEncoder;
     private final SparkMaxConfig motorConfig;
 
     private final LoggedNetworkNumber loggedKP = new LoggedNetworkNumber("Intake/Wrist/kP", IntakeConstants.wristP);
@@ -34,7 +34,7 @@ public class WristIOSpark implements WristIO {
     public WristIOSpark() {
         wristMotor = new SparkMax(IntakeConstants.kWristCANID, MotorType.kBrushless);
         wristController = wristMotor.getClosedLoopController();
-        wristEncoder = wristMotor.getAbsoluteEncoder();
+        wristEncoder = wristMotor.getEncoder();
 
         motorConfig = IntakeConstants.wristSparkConfig;
 
@@ -76,7 +76,7 @@ public class WristIOSpark implements WristIO {
         inputs.position = new Rotation2d(wristEncoder.getPosition());
         inputs.velocityRadPerSec = wristEncoder.getVelocity();
 
-        inputs.appliedVolts = wristMotor.getBusVoltage();
+        inputs.appliedVolts = wristMotor.getBusVoltage() * wristMotor.getAppliedOutput();
         inputs.currentAmps = wristMotor.getOutputCurrent();
     }
 
