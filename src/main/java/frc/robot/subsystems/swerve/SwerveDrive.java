@@ -7,8 +7,10 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 
+import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -24,6 +26,9 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.Constants;
+import frc.robot.Constants.SwerveConstants;
+
 import frc.robot.Constants;
 import frc.robot.Constants.SwerveConstants;
 
@@ -44,8 +49,8 @@ public class SwerveDrive extends SubsystemBase {
     private final SwerveDriveKinematics kinematics;
     private final SwerveDrivePoseEstimator poseEstimator;
 
-    private final PIDController autoXController       = new PIDController(10.0, 0.0, 0.0);
-    private final PIDController autoYController       = new PIDController(10.0, 0.0, 0.0);
+    private final PIDController autoXController = new PIDController(10.0, 0.0, 0.0);
+    private final PIDController autoYController = new PIDController(10.0, 0.0, 0.0);
     private final PIDController autoHeadingController = new PIDController(7.5, 0.0, 0.0);
 
     private boolean toX;

@@ -34,7 +34,7 @@ public class RobotContainer {
         driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
         auxController = new CommandXboxController(OperatorConstants.kAuxControllerPort);
 
-        switch (Constants.currentMode) {
+        switch(Constants.currentMode) {
             case REAL:
                 swerve = new SwerveDrive(
                     new GyroIOPigeon(),
