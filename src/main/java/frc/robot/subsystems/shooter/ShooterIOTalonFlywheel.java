@@ -1,15 +1,14 @@
 package frc.robot.subsystems.shooter;
 
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.NeutralModeValue;
+
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.util.LoggedTunableControlConstants;
+
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class ShooterIOTalonFlywheel implements ShooterIO {
     public final TalonFX motor;
@@ -17,63 +16,34 @@ public class ShooterIOTalonFlywheel implements ShooterIO {
 
     private final MotionMagicVelocityVoltage velocityRequest = new MotionMagicVelocityVoltage(0.0);
 
-    private final LoggedNetworkNumber loggedKP = new LoggedNetworkNumber("Shooter/Flywheel/Tuning/kP", ShooterConstants.kP);
-    private final LoggedNetworkNumber loggedKD = new LoggedNetworkNumber("Shooter/Flywheel/Tuning/kD", ShooterConstants.kD);
-    private final LoggedNetworkNumber loggedKS = new LoggedNetworkNumber("Shooter/Flywheel/Tuning/kS", ShooterConstants.kS);
-    private final LoggedNetworkNumber loggedKV = new LoggedNetworkNumber("Shooter/Flywheel/Tuning/kV", ShooterConstants.kV);
-
-    private double lastKp = 0.0;
-    private double lastKd = 0.0;
-    private double lastKs = 0.0;
-    private double lastKv = 0.0;
+    public final LoggedTunableControlConstants controlConstants = new LoggedTunableControlConstants("Shooter/Flywheel");
 
     public ShooterIOTalonFlywheel(int CANID) {
         motor = new TalonFX(CANID);
         this.CANID = CANID;
-        
-        MotorOutputConfigs outputConfigs = new MotorOutputConfigs(); 
-        outputConfigs.NeutralMode = NeutralModeValue.Coast; // IMPORTANT
-        motor.getConfigurator().apply(outputConfigs);
 
-        TalonFXConfiguration talonConfigs = new TalonFXConfiguration();
+        motor.getConfigurator().apply(ShooterConstants.talonFlywheelConfigs);
 
-        var slot0 = talonConfigs.Slot0;
-        slot0.kP = ShooterConstants.kP;
-        slot0.kD = ShooterConstants.kD;
-        slot0.kS = ShooterConstants.kS;
-        slot0.kV = ShooterConstants.kV;
-
-        var motionMagicConfigs = talonConfigs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = ShooterConstants.mmCruise;
-        motionMagicConfigs.MotionMagicAcceleration = ShooterConstants.mmAcceleration;
-        motionMagicConfigs.MotionMagicJerk = ShooterConstants.mmJerk;
-
-        motor.getConfigurator().apply(talonConfigs);
+        controlConstants
+            .setP(ShooterConstants.kP)
+            .setD(ShooterConstants.kD)
+            .setS(ShooterConstants.kS)
+            .setV(ShooterConstants.kV);
     }
 
     @Override
     public void periodic() {
-        double currentKp = loggedKP.get();
-        double currentKd = loggedKD.get();
-        double currentKs = loggedKS.get();
-        double currentKv = loggedKV.get();
-
-        if (currentKp != lastKp || currentKd != lastKd || currentKs != lastKs || currentKv != lastKv) {
+        controlConstants.setCallback((double kP, double kI, double kD, double kS, double kV, double kCos) -> {
             Slot0Configs slot0 = new Slot0Configs();
-            slot0.kP = currentKp;
-            slot0.kD = currentKd;
-            slot0.kS = currentKs;
-            slot0.kV = currentKv;
+            slot0.kP = kP;
+            slot0.kD = kD;
+            slot0.kS = kS;
+            slot0.kV = kV;
 
-            motor.getConfigurator().apply(slot0);
+            motor.getConfigurator().apply(slot0, 0);
 
-            lastKp = currentKp;
-            lastKd = currentKd;
-            lastKs = currentKs;
-            lastKv = currentKv;
-
-            System.out.println("TalonFX Constants Updated!");
-        }
+            System.out.println("Control Constants Updated!");
+        });
     }
 
     @Override
@@ -97,6 +67,7 @@ public class ShooterIOTalonFlywheel implements ShooterIO {
 
     public void updateInputs(ShooterIOInputs inputs){
         inputs.velocityRadPerSec = motor.getVelocity().getValueAsDouble() * 2 * Math.PI;
+
         inputs.appliedVolts = motor.getMotorVoltage().getValueAsDouble();
         inputs.supplyCurrentAmps = motor.getSupplyCurrent().getValueAsDouble();
     }

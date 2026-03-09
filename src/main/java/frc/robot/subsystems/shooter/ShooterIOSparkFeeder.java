@@ -9,8 +9,9 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.util.LoggedTunableControlConstants;
+
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class ShooterIOSparkFeeder implements ShooterIO {
 
@@ -19,15 +20,7 @@ public class ShooterIOSparkFeeder implements ShooterIO {
     public final SparkClosedLoopController feederController;
     public final SparkMaxConfig motorConfig;
 
-    private final LoggedNetworkNumber loggedKP = new LoggedNetworkNumber("Shooter/Feeder/Tuning/kP", ShooterConstants.kP);
-    private final LoggedNetworkNumber loggedKD = new LoggedNetworkNumber("Shooter/Feeder/Tuning/kD", ShooterConstants.kD);
-    private final LoggedNetworkNumber loggedKS = new LoggedNetworkNumber("Shooter/Feeder/Tuning/kS", ShooterConstants.kS);
-    private final LoggedNetworkNumber loggedKV = new LoggedNetworkNumber("Shooter/Feeder/Tuning/kV", ShooterConstants.kV);
-
-    private double lastKp = 0.0;
-    private double lastKd = 0.0;
-    private double lastKs = 0.0;
-    private double lastKv = 0.0;
+    public final LoggedTunableControlConstants controlConstants = new LoggedTunableControlConstants("Shooter/Feeder");
 
     public ShooterIOSparkFeeder(int CANID) {
         feederMotor = new SparkMax(CANID, MotorType.kBrushless);
@@ -38,32 +31,28 @@ public class ShooterIOSparkFeeder implements ShooterIO {
 
         motorConfig = ShooterConstants.feederConfig;
         feederMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+        controlConstants
+            .setP(ShooterConstants.kP)
+            .setD(ShooterConstants.kD)
+            .setS(ShooterConstants.kS)
+            .setV(ShooterConstants.kV);
     }
 
     @Override
     public void periodic() {
-        double currentKp = loggedKP.get();
-        double currentKd = loggedKD.get();
-        double currentKs = loggedKS.get();
-        double currentKv = loggedKV.get();
-
-        if (currentKp != lastKp || currentKd != lastKd || currentKs != lastKs || currentKv != lastKv) {
+        controlConstants.setCallback((double kP, double kI, double kD, double kS, double kV, double kCos) -> {
             motorConfig.closedLoop
-                .p(currentKp)
-                .d(currentKd);
+                .p(kP)
+                .d(kD);
             motorConfig.closedLoop.feedForward
-                .kV(currentKv)
-                .kS(currentKs);
+                .kV(kV)
+                .kS(kS);
 
             feederMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
 
-            lastKp = currentKp;
-            lastKd = currentKd;
-            lastKs = currentKs;
-            lastKv = currentKv;
-
-            System.out.println("SparkMax Constants Updated!");
-        }
+            System.out.println("Control Constants Updated!");
+        });
     }
 
     @Override 
@@ -90,7 +79,7 @@ public class ShooterIOSparkFeeder implements ShooterIO {
     public void updateInputs(ShooterIOInputs inputs){
         inputs.velocityRadPerSec = feederEncoder.getVelocity();
 
-        inputs.appliedVolts = feederMotor.getBusVoltage();
+        inputs.appliedVolts = feederMotor.getBusVoltage() * feederMotor.getAppliedOutput();
         inputs.supplyCurrentAmps = feederMotor.getOutputCurrent();
     }
 }

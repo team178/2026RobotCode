@@ -9,8 +9,9 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.util.LoggedTunableControlConstants;
+
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class ShooterIOSparkIndex implements ShooterIO {
 
@@ -19,15 +20,7 @@ public class ShooterIOSparkIndex implements ShooterIO {
     public final SparkClosedLoopController indexController;
     public final SparkMaxConfig motorConfig;
 
-    private final LoggedNetworkNumber loggedKP = new LoggedNetworkNumber("Shooter/Index/Tuning/kP", ShooterConstants.kP);
-    private final LoggedNetworkNumber loggedKD = new LoggedNetworkNumber("Shooter/Index/Tuning/kD", ShooterConstants.kD);
-    private final LoggedNetworkNumber loggedKS = new LoggedNetworkNumber("Shooter/Index/Tuning/kS", ShooterConstants.kS);
-    private final LoggedNetworkNumber loggedKV = new LoggedNetworkNumber("Shooter/Index/Tuning/kV", ShooterConstants.kV);
-
-    private double lastKp = 0.0;
-    private double lastKd = 0.0;
-    private double lastKs = 0.0;
-    private double lastKv = 0.0;
+    public final LoggedTunableControlConstants controlConstants = new LoggedTunableControlConstants("Shooter/Index");
 
     public ShooterIOSparkIndex(int CANID) {
         indexMotor = new SparkMax(CANID, MotorType.kBrushless);
@@ -38,32 +31,28 @@ public class ShooterIOSparkIndex implements ShooterIO {
 
         motorConfig = ShooterConstants.indexConfig;
         indexMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+        controlConstants
+            .setP(ShooterConstants.indexkP)
+            .setD(ShooterConstants.indexkD)
+            .setS(ShooterConstants.indexkS)
+            .setV(ShooterConstants.indexkV);
     }
 
     @Override
     public void periodic() {
-        double currentKp = loggedKP.get();
-        double currentKd = loggedKD.get();
-        double currentKs = loggedKS.get();
-        double currentKv = loggedKV.get();
-
-        if (currentKp != lastKp || currentKd != lastKd || currentKs != lastKs || currentKv != lastKv) {
+        controlConstants.setCallback((double kP, double kI, double kD, double kS, double kV, double kCos) -> {
             motorConfig.closedLoop
-                .p(currentKp)
-                .d(currentKd);
+                .p(kP)
+                .d(kD);
             motorConfig.closedLoop.feedForward
-                .kV(currentKv)
-                .kS(currentKs);
+                .kV(kV)
+                .kS(kS);
 
             indexMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
 
-            lastKp = currentKp;
-            lastKd = currentKd;
-            lastKs = currentKs;
-            lastKv = currentKv;
-
-            System.out.println("SparkMax Constants Updated!");
-        }
+            System.out.println("Control Constants Updated!");
+        });
     }
 
     @Override 
@@ -90,7 +79,7 @@ public class ShooterIOSparkIndex implements ShooterIO {
     public void updateInputs(ShooterIOInputs inputs){
         inputs.velocityRadPerSec = indexEncoder.getVelocity();
 
-        inputs.appliedVolts = indexMotor.getBusVoltage();
+        inputs.appliedVolts = indexMotor.getBusVoltage() * indexMotor.getAppliedOutput();
         inputs.supplyCurrentAmps = indexMotor.getOutputCurrent();
     }
 }

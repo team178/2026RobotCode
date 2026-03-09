@@ -1,8 +1,8 @@
 package frc.robot;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.FeedbackSensor;
-import com.revrobotics.spark.SparkBase;
-import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
@@ -254,10 +254,12 @@ public class Constants {
 
         public static final SparkMaxConfig feederConfig = new SparkMaxConfig();
         public static final SparkMaxConfig indexConfig = new SparkMaxConfig();
+        public static final TalonFXConfiguration talonFlywheelConfigs = new TalonFXConfiguration();
 
         public static final double feederMotorReduction = 3.0 / 1.0;
         public static final double feederEncoderPositionFactor = 2 * Math.PI / feederMotorReduction;
         public static final double feederEncoderVelocityFactor = (2 * Math.PI) / 60.0 / feederMotorReduction;
+
 
         static {
             feederConfig
@@ -292,7 +294,7 @@ public class Constants {
                 .smartCurrentLimit(30)
                 .voltageCompensation(12)
                 .closedLoopRampRate(0.01)
-                .inverted(false); // i hope not ❤️
+                .inverted(false);
             indexConfig.encoder
                 .positionConversionFactor(feederEncoderPositionFactor)
                 .positionConversionFactor(feederEncoderVelocityFactor)
@@ -313,6 +315,20 @@ public class Constants {
                 .appliedOutputPeriodMs(20)
                 .busVoltagePeriodMs(20)
                 .outputCurrentPeriodMs(20);
+
+            
+            talonFlywheelConfigs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+
+            var slot0 = talonFlywheelConfigs.Slot0;
+            slot0.kP = ShooterConstants.kP;
+            slot0.kD = ShooterConstants.kD;
+            slot0.kS = ShooterConstants.kS;
+            slot0.kV = ShooterConstants.kV;
+
+            var motionMagicConfigs = talonFlywheelConfigs.MotionMagic;
+            motionMagicConfigs.MotionMagicCruiseVelocity = ShooterConstants.mmCruise;
+            motionMagicConfigs.MotionMagicAcceleration = ShooterConstants.mmAcceleration;
+            motionMagicConfigs.MotionMagicJerk = ShooterConstants.mmJerk;
         }
     }
 }
