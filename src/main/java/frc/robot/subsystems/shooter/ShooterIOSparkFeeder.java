@@ -33,10 +33,10 @@ public class ShooterIOSparkFeeder implements ShooterIO {
         feederMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         controlConstants
-            .setP(ShooterConstants.kP)
-            .setD(ShooterConstants.kD)
-            .setS(ShooterConstants.kS)
-            .setV(ShooterConstants.kV);
+            .setP(ShooterConstants.feederkP)
+            .setD(ShooterConstants.feederkD)
+            .setS(ShooterConstants.feederkS)
+            .setV(ShooterConstants.feederkV);
     }
 
     @Override
