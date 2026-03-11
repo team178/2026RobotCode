@@ -20,5 +20,7 @@ public interface WristIO {
 
     public default void setSetpoint(double angle) {}
 
+    public default void resetPosition() {}
+
     public default void setOpenLoop(double voltage) {}
 }

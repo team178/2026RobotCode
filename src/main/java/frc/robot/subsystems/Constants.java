@@ -215,7 +215,7 @@ public class Constants {
         public static final SparkMaxConfig wristSparkConfig = new SparkMaxConfig();
         public static final SparkMaxConfig rollerSparkConfig = new SparkMaxConfig();
 
-        public static final double intakeMaxSpeed = 6; // rad/sec
+        public static final double intakeMaxSpeed = 600; // rad/sec
 
         public static final double wristMotorReduction = 32.0 / 1.0;
         public static final double rollerMotorReduction = 2.0 / 1.0;
@@ -225,19 +225,19 @@ public class Constants {
         public static final double rollerEncoderPositionFactor = 2 * Math.PI / rollerMotorReduction;
         public static final double rollerEncoderVelocityFactor = (2 * Math.PI) / rollerMotorReduction / 60;
 
-        public static final double wristP = 0;
+        public static final double wristP = 0.6;
         public static final double wristD = 0;
         public static final double wristCos = 0;
         public static final double wristS = 0;
 
-        public static final double rollerP = 0;
+        public static final double rollerP = 0.00025;
         public static final double rollerD = 0;
-        public static final double rollerS = 0;
-        public static final double rollerV = 0;
+        public static final double rollerS = 0.23;
+        public static final double rollerV = 0.0395;
 
         public static enum IntakeWristPose {
-            RETRACTED(0),
-            EXTENDED(1);
+            STOWED(0.1),
+            DEPLOYED(1.95);
 
             private final double setpoint;
 

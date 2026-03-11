@@ -56,9 +56,9 @@ public class WristIOSpark implements WristIO {
         if (currentKp != lastKp || currentKd != lastKd || currentKs != lastKs || currentKcos != lastKcos) {
 
             motorConfig.closedLoop
-                .pid(IntakeConstants.wristP, 0.0, IntakeConstants.wristD);
+                .pid(currentKp, 0.0, currentKd);
             motorConfig.closedLoop.feedForward
-                .kCos(IntakeConstants.wristCos).kS(IntakeConstants.wristS);
+                .kCos(currentKcos).kS(currentKs);
 
             wristMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
 
@@ -69,6 +69,11 @@ public class WristIOSpark implements WristIO {
 
             System.out.println("SparkMax Constants Updated!");
         }
+    }
+
+    @Override
+    public void resetPosition() {
+        wristEncoder.setPosition(0);
     }
 
     @Override
