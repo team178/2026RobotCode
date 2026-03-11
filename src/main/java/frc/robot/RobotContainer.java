@@ -12,18 +12,25 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.ClimbIO;
 import frc.robot.subsystems.climb.ClimbIOSpark;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIO;
+import frc.robot.subsystems.shooter.ShooterIOSparkFeeder;
+import frc.robot.subsystems.shooter.ShooterIOSparkIndex;
+import frc.robot.subsystems.shooter.ShooterIOTalonFlywheel;
 import frc.robot.subsystems.swerve.GyroIO;
 import frc.robot.subsystems.swerve.GyroIOPigeon;
 import frc.robot.subsystems.swerve.SDSModuleIO;
 import frc.robot.subsystems.swerve.SDSModuleIOSim;
 import frc.robot.subsystems.swerve.SDSModuleIOSpark;
 import frc.robot.subsystems.swerve.SwerveDrive;
+import frc.robot.Constants.ShooterConstants;
 
 public class RobotContainer {
     private final CommandXboxController driverController;
     private final CommandXboxController auxController;
 
     private final SwerveDrive swerve;
+    private final Shooter shooter;
     private final Climb climb;
 
     public RobotContainer() {
@@ -41,6 +48,13 @@ public class RobotContainer {
                     new SDSModuleIOSpark(2),
                     new SDSModuleIOSpark(3)
                 );
+                shooter = new Shooter(
+                    new ShooterIOTalonFlywheel(ShooterConstants.shooterLMotorCANID),
+                    new ShooterIOTalonFlywheel(ShooterConstants.shooterMMotorCANID),
+                    new ShooterIOTalonFlywheel(ShooterConstants.shooterRMotorCANID),
+                    new ShooterIOSparkFeeder(ShooterConstants.feederMotorCANID),
+                    new ShooterIOSparkIndex(ShooterConstants.indexMotorCANID)
+                );
                 climb = new Climb(
                     new ClimbIOSpark()
                 );
@@ -53,6 +67,13 @@ public class RobotContainer {
                     new SDSModuleIOSim(),
                     new SDSModuleIOSim()
                 );
+                shooter = new Shooter(
+                    new ShooterIO() {},
+                    new ShooterIO() {},
+                    new ShooterIO() {},
+                    new ShooterIO() {},
+                    new ShooterIO() {}
+                );
                 climb = new Climb(
                     new ClimbIO() {}
                 );
@@ -64,6 +85,13 @@ public class RobotContainer {
                     new SDSModuleIO() {},
                     new SDSModuleIO() {},
                     new SDSModuleIO() {}
+                );
+                shooter = new Shooter(
+                    new ShooterIO() {},
+                    new ShooterIO() {},
+                    new ShooterIO() {},
+                    new ShooterIO() {},
+                    new ShooterIO() {}
                 );
                 climb = new Climb(
                     new ClimbIO() {}
@@ -85,13 +113,9 @@ public class RobotContainer {
         driverController.y().onTrue(swerve.runZeroGyro());
         driverController.x().onTrue(swerve.runToggleToXPosition());
         driverController.b().onTrue(swerve.runReconfigure());
-        
-        climb.setDefaultCommand(
-             climb.runClimb(
-                 driverController.rightBumper()::getAsBoolean,
-                 driverController.leftBumper()::getAsBoolean
-             )
-        );
+
+        shooter.setDefaultCommand(shooter.runStopShooter());
+        driverController.rightBumper().whileTrue(shooter.runAllFromNetworkSpeed());
     }
 
     public void testPeriodic() {
