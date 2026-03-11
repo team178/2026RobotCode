@@ -1,15 +1,6 @@
-// ============================================================
-// RobotContainer.java  — UPDATED
-// Changes from original:
-//   1. Added IntakeSubsystem and ShooterSubsystem fields
-//   2. Added AutoFactory construction (ChoreoLib)
-//   3. Added AutoChooser with Path2877Auto registered
-//   4. getAutonomousCommand() now returns the selected auto
-//   5. RobotModeTriggers schedules the auto during autonomous
-//
-// Lines marked  // [NEW]  are additions to the original file.
-// All original bindings and swerve setup are preserved unchanged.
-// ============================================================
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
 
@@ -20,9 +11,7 @@ import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard; // [NEW]
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers; // [NEW]
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants; // [NEW]
 // import frc.robot.subsystems.IntakeSubsystem;  // [NEW] — adjust package if needed
@@ -42,6 +31,7 @@ public class RobotContainer {
     // -------------------------------------------------------
     private final CommandXboxController driverController;
     private final CommandXboxController auxController;
+
     private final SwerveDrive swerve;
     private final AutoFactory autoFactory;
 
@@ -66,12 +56,9 @@ public class RobotContainer {
         // Temporary swerve construction to pass into AutoFactory — will be re-assigned properly below
 
         driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
-        auxController    = new CommandXboxController(OperatorConstants.kAuxControllerPort);
+        auxController = new CommandXboxController(OperatorConstants.kAuxControllerPort);
 
-        // -------------------------------------------------------
-        // Existing swerve construction — UNCHANGED
-        // -------------------------------------------------------
-        switch (Constants.currentMode) {
+        switch(Constants.currentMode) {
             case REAL:
                 swerve = new SwerveDrive(
                     new GyroIOPigeon(),
@@ -112,15 +99,12 @@ public class RobotContainer {
         configureBindings();
     }
 
-    // -------------------------------------------------------
-    // Existing bindings — UNCHANGED
-    // -------------------------------------------------------
     private void configureBindings() {
         swerve.setDefaultCommand(swerve.runDriveInputs(
-            driverController::getLeftX,
-            driverController::getLeftY,
-            driverController::getRightX,
-            driverController::getRightTriggerAxis
+            driverController::getLeftX, // vx
+            driverController::getLeftY, // vy
+            driverController::getRightX, // omega
+            driverController::getRightTriggerAxis // raw slow input
         ));
 
         driverController.y().onTrue(swerve.runZeroGyro());

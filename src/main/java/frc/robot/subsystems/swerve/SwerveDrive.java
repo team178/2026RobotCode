@@ -29,7 +29,6 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import frc.robot.Constants.SwerveConstants;
 
-
 public class SwerveDrive extends SubsystemBase {
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroIOInputs;
@@ -40,8 +39,8 @@ public class SwerveDrive extends SubsystemBase {
     private final SwerveDriveKinematics kinematics;
     private final SwerveDrivePoseEstimator poseEstimator;
 
-    private final PIDController autoXController       = new PIDController(10.0, 0.0, 0.0);
-    private final PIDController autoYController       = new PIDController(10.0, 0.0, 0.0);
+    private final PIDController autoXController = new PIDController(10.0, 0.0, 0.0);
+    private final PIDController autoYController = new PIDController(10.0, 0.0, 0.0);
     private final PIDController autoHeadingController = new PIDController(7.5, 0.0, 0.0);
 
     private boolean toX;
@@ -82,7 +81,7 @@ public class SwerveDrive extends SubsystemBase {
     
         lastMove = Timer.getFPGATimestamp();
 
-        autoHeadingController.enableContinuousInput(-Math.PI, Math.PI);
+        autoHeadingController.enableContinuousInput(0, 2 * Math.PI);
     }
 
     private double adjustAxisInput(
@@ -300,7 +299,7 @@ public class SwerveDrive extends SubsystemBase {
         // ChassisSpeeds.fromFieldRelativeSpeeds() and discretize() logic applies,
         // matching exactly how teleop driving works.
         runChassisSpeeds(speeds);
-    }    
+    }
 
     public void addVisionMeasurement(Pose2d visionMeasurement, double timestamp, Matrix<N3,N1> stdDevs) {
         // higher standard deviations means vision measurements are trusted less
