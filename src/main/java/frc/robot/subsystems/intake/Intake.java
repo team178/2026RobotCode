@@ -13,6 +13,7 @@ public class Intake extends SubsystemBase {
     private final WristIO wristIO;
 
     private boolean isDeployedFlag = true;
+    private boolean isHomingFlag = false;
 
     private RollerIOInputsAutoLogged rollerInputs = new RollerIOInputsAutoLogged();
     private WristIOInputsAutoLogged wristInputs = new WristIOInputsAutoLogged();
@@ -65,6 +66,19 @@ public class Intake extends SubsystemBase {
         return run(() -> {
             rollerIO.setOpenLoop(0);
         });
+    }
+
+    public Command runHomingRoutine() {
+        return run(() -> {
+            isHomingFlag = true;
+            wristIO.setOpenLoop(-2.0);
+        })
+            .until(() -> wristInputs.currentAmps > IntakeConstants.autoHomeCurrentThreshold)
+            .andThen(resetPosition())
+            .andThen(() -> {
+                isDeployedFlag = false;
+                isHomingFlag = false;
+            });
     }
 
     @Override

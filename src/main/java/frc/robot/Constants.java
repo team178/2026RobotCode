@@ -406,6 +406,8 @@ public class Constants {
 
         public static final double intakeMaxSpeed = 600; // rad/sec
 
+        public static final double autoHomeCurrentThreshold = 30;
+
         public static final double wristMotorReduction = 32.0 / 1.0;
         public static final double rollerMotorReduction = 2.0 / 1.0;
 

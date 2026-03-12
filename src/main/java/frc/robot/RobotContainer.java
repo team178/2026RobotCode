@@ -132,12 +132,11 @@ public class RobotContainer {
         driverController.x().onTrue(swerve.runToggleToXPosition());
         driverController.b().onTrue(swerve.runReconfigure());
 
-        shooter.setDefaultCommand(shooter.runStopShooter());
+        shooter.setDefaultCommand(shooter.runShooterIdle());
         driverController.rightBumper().whileTrue(shooter.runAllFromNetworkSpeed());
 
-        driverController.x().onTrue(intake.toggleWristPose());
-        driverController.leftBumper().whileTrue(intake.runRollers());
-        driverController.leftBumper().whileFalse(intake.runStopRollers());
+        intake.setDefaultCommand(intake.runRollers());
+        driverController.a().onTrue(intake.toggleWristPose());
     }
 
     public void testPeriodic() {
