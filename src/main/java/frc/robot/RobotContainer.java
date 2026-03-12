@@ -4,11 +4,14 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.Constants.VisionConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.ClimbIO;
@@ -29,12 +32,16 @@ import frc.robot.subsystems.swerve.SDSModuleIO;
 import frc.robot.subsystems.swerve.SDSModuleIOSim;
 import frc.robot.subsystems.swerve.SDSModuleIOSpark;
 import frc.robot.subsystems.swerve.SwerveDrive;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIOPhoton;
+import frc.robot.subsystems.vision.VisionIO;
 
 public class RobotContainer {
     private final CommandXboxController driverController;
     private final CommandXboxController auxController;
 
     private final SwerveDrive swerve;
+    private final Vision vision;
     private final Shooter shooter;
     private final Intake intake;
     private final Climb climb;
@@ -53,6 +60,13 @@ public class RobotContainer {
                     new SDSModuleIOSpark(1),
                     new SDSModuleIOSpark(2),
                     new SDSModuleIOSpark(3)
+                );
+                vision = new Vision(
+                    swerve::addVisionMeasurement,
+                    new VisionIOPhoton(VisionConstants.camConfigs[0]),
+                    new VisionIOPhoton(VisionConstants.camConfigs[1]),
+                    new VisionIOPhoton(VisionConstants.camConfigs[2]),
+                    new VisionIOPhoton(VisionConstants.camConfigs[3])
                 );
                 shooter = new Shooter(
                     new ShooterIOTalonFlywheel(ShooterConstants.shooterLMotorCANID),
@@ -77,6 +91,13 @@ public class RobotContainer {
                     new SDSModuleIOSim(),
                     new SDSModuleIOSim()
                 );
+                vision = new Vision(
+                    swerve::addVisionMeasurement,
+                    new VisionIO() {},
+                    new VisionIO() {},
+                    new VisionIO() {},
+                    new VisionIO() {}
+                );
                 shooter = new Shooter(
                     new ShooterIO() {},
                     new ShooterIO() {},
@@ -99,6 +120,13 @@ public class RobotContainer {
                     new SDSModuleIO() {},
                     new SDSModuleIO() {},
                     new SDSModuleIO() {}
+                );
+                vision = new Vision(
+                    swerve::addVisionMeasurement,
+                    new VisionIO() {},
+                    new VisionIO() {},
+                    new VisionIO() {},
+                    new VisionIO() {}
                 );
                 shooter = new Shooter(
                     new ShooterIO() {},
@@ -127,6 +155,8 @@ public class RobotContainer {
             driverController::getRightX, // omega
             driverController::getRightTriggerAxis // raw slow input
         ));
+
+        auxController.x().onTrue(swerve.runToggleAimHub());
 
         driverController.y().onTrue(swerve.runZeroGyro());
         driverController.x().onTrue(swerve.runToggleToXPosition());
