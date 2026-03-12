@@ -153,19 +153,18 @@ public class RobotContainer {
             driverController::getRightX, // omega
             driverController::getRightTriggerAxis // raw slow input
         ));
-
         auxController.x().onTrue(swerve.runToggleAimHub());
-
         driverController.y().onTrue(swerve.runZeroGyro());
         driverController.x().onTrue(swerve.runToggleToXPosition());
         driverController.b().onTrue(swerve.runReconfigure());
 
         shooter.setDefaultCommand(shooter.runShooterIdle());
         driverController.rightBumper().whileTrue(shooter.runAllFromNetworkSpeed());
+        auxController.x().onTrue(shooter.incrementShooterDistanceAdjust(true));
+        auxController.y().onTrue(shooter.incrementShooterDistanceAdjust(false));
 
         intake.setDefaultCommand(intake.runRollers());
         driverController.a().onTrue(intake.toggleWristPose());
-
         auxController.a().onTrue(intake.incrementWristSetpointAdjust(true));
         auxController.b().onTrue(intake.incrementWristSetpointAdjust(false));
     }

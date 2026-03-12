@@ -24,6 +24,8 @@ public class Shooter extends SubsystemBase {
 
     private final ShooterIOInputsAutoLogged[] shooterInputs = new ShooterIOInputsAutoLogged[5];
 
+    private double shooterDistanceAdjust = 0;
+
     public Shooter(ShooterIO shooterIOL, ShooterIO shooterIOM, ShooterIO shooterIOR, ShooterIO feederIO, ShooterIO indexIO) {
         this.shooterIOL = shooterIOL;
         this.shooterIOM = shooterIOM;
@@ -37,7 +39,7 @@ public class Shooter extends SubsystemBase {
     }
 
     private void shootWithDistance(double distanceMeters) {
-        double shooterVelocityRadPerSec = HubShootLUT.getFlywheelSpeedAtDistance(distanceMeters);
+        double shooterVelocityRadPerSec = HubShootLUT.getFlywheelSpeedAtDistance(distanceMeters + shooterDistanceAdjust);
         double feederVelocityRadPerSec = shooterVelocityRadPerSec * ShooterConstants.feederMotorMult;
 
         shooterIOL.setVelocityClosedLoop(shooterVelocityRadPerSec);
@@ -45,6 +47,16 @@ public class Shooter extends SubsystemBase {
         shooterIOR.setVelocityClosedLoop(shooterVelocityRadPerSec);
         feederIO.setVelocityClosedLoop(feederVelocityRadPerSec);
         indexIO.setVelocityClosedLoop(feederVelocityRadPerSec);
+    }
+
+    public Command incrementShooterDistanceAdjust(boolean positive) {
+        return runOnce(() -> {
+            if (positive) {
+                shooterDistanceAdjust += 0.2;
+            } else {
+                shooterDistanceAdjust -= 0.2;
+            }
+        });
     }
 
     public Command runStopShooter() {
