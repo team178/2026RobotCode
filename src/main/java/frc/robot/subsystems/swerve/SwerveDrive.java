@@ -154,12 +154,13 @@ public class SwerveDrive extends SubsystemBase {
 
             ChassisSpeeds chassisSpeeds = new ChassisSpeeds(mag * Math.cos(dir), mag * Math.sin(dir), omega);    
             
-            runChassisSpeeds(chassisSpeeds);
+            runChassisSpeeds(chassisSpeeds, false);
         });
     }
 
     public void runChassisSpeeds(
-        ChassisSpeeds chassisSpeeds
+        ChassisSpeeds chassisSpeeds,
+        boolean isRedFlipped
     ) {
         if (
             chassisSpeeds.vxMetersPerSecond != 0 ||
@@ -176,7 +177,7 @@ public class SwerveDrive extends SubsystemBase {
 
         ChassisSpeeds adjustedSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
             chassisSpeeds,
-            getPose().getRotation().rotateBy(new Rotation2d(Constants.isRed() ? Math.PI : 0))
+            getPose().getRotation().rotateBy(new Rotation2d(Constants.isRed() && !isRedFlipped ? Math.PI : 0))
         );
 
         adjustedSpeeds = ChassisSpeeds.discretize(adjustedSpeeds, LoggedRobot.defaultPeriodSecs);
@@ -298,7 +299,7 @@ public class SwerveDrive extends SubsystemBase {
         // NOTE: We call runChassisSpeeds() directly so that the existing
         // ChassisSpeeds.fromFieldRelativeSpeeds() and discretize() logic applies,
         // matching exactly how teleop driving works.
-        runChassisSpeeds(speeds);
+        runChassisSpeeds(speeds, true);
     }
 
     public void addVisionMeasurement(Pose2d visionMeasurement, double timestamp, Matrix<N3,N1> stdDevs) {
