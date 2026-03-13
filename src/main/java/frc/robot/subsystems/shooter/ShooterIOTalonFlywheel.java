@@ -1,5 +1,7 @@
 package frc.robot.subsystems.shooter;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
@@ -8,8 +10,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.util.LoggedTunableControlConstants;
-
-import org.littletonrobotics.junction.Logger;
 
 public class ShooterIOTalonFlywheel implements ShooterIO {
     public final TalonFX motor;
