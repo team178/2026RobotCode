@@ -103,6 +103,9 @@ public class Intake extends SubsystemBase {
             }
         }
 
+        Logger.recordOutput("Intake/Deployed", isDeployedFlag);
+        Logger.recordOutput("Intake/Homing", isHomingFlag);
+
         rollerIO.periodic();
         wristIO.periodic();
 

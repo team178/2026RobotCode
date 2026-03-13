@@ -205,6 +205,9 @@ public class Shooter extends SubsystemBase {
             disabledTimer.reset();
         }
 
+        Logger.recordOutput("Shooter/OrchestraPlaying", orchestra.isPlaying());
+        Logger.recordOutput("Shooter/DisabledTimer", disabledTimer.get());
+
         if (runShooterFlag) {
             shooterIOL.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
             shooterIOM.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
@@ -221,6 +224,10 @@ public class Shooter extends SubsystemBase {
             feederIO.setOpenLoop(0);
             indexIO.setOpenLoop(0);
         }
+
+        Logger.recordOutput("Shooter/ShooterRunning", runShooterFlag);
+        Logger.recordOutput("Shooter/IndexRunning", runIndexFlag);
+        Logger.recordOutput("Shooter/ShooterDistanceAdjust", shooterDistanceAdjust);
 
         shooterIOL.periodic();
         shooterIOM.periodic();
