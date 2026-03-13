@@ -1,12 +1,12 @@
 package frc.robot.subsystems.intake;
 
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.IntakeConstants.IntakeWristPose;
-
-import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class Intake extends SubsystemBase {
     private final RollerIO rollerIO;
@@ -17,8 +17,8 @@ public class Intake extends SubsystemBase {
 
     private double wristSetpointAdjust = 0.0;
 
-    private RollerIOInputsAutoLogged rollerInputs = new RollerIOInputsAutoLogged();
-    private WristIOInputsAutoLogged wristInputs = new WristIOInputsAutoLogged();
+    private final RollerIOInputsAutoLogged rollerInputs = new RollerIOInputsAutoLogged();
+    private final WristIOInputsAutoLogged wristInputs = new WristIOInputsAutoLogged();
 
     LoggedNetworkNumber speed = new LoggedNetworkNumber("Intake/Roller/Speed", IntakeConstants.intakeMaxSpeed);
     LoggedNetworkNumber position = new LoggedNetworkNumber("Intake/Wrist/Pose", 0);

@@ -1,5 +1,12 @@
 package frc.robot.subsystems.shooter;
 
+import java.util.function.Supplier;
+
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+
+import com.ctre.phoenix6.Orchestra;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.Timer;
@@ -8,12 +15,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.util.HubShootLUT;
-import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
-
-import java.util.function.Supplier;
-
-import com.ctre.phoenix6.Orchestra;
 
 public class Shooter extends SubsystemBase {
     private final ShooterIO shooterIOL;
