@@ -184,6 +184,30 @@ public class Shooter extends SubsystemBase {
         });
     }
 
+    public Command runShooterOn() {
+        return runOnce(() -> {
+            runShooterFlag = true;
+        });
+    }
+
+    public Command runIndexOn() {
+        return runOnce(() -> {
+            runIndexFlag = true;
+        });
+    }
+
+    public Command runShooterOff() {
+        return runOnce(() -> {
+            runShooterFlag = false;
+        });
+    }
+
+    public Command runIndexOff() {
+        return runOnce(() -> {
+            runIndexFlag = false;
+        });
+    }
+
     @Override
     public void periodic() {
         // if (RobotState.isDisabled()) {

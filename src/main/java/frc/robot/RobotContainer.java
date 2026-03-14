@@ -1,3 +1,4 @@
+
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
@@ -12,6 +13,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.ShooterConstants;
@@ -202,7 +204,7 @@ public class RobotContainer {
             driverController::getRightX, // omega
             driverController::getLeftTriggerAxis // raw slow input
         ));
-//        auxController.x().onTrue(swerve.runToggleAimHub());
+       auxController.rightTrigger().onTrue(swerve.runToggleAimHub());
         driverController.y().onTrue(swerve.runZeroGyro());
 //        driverController.x().onTrue(swerve.runToggleToXPosition());
 //        driverController.b().onTrue(swerve.runReconfigure());
@@ -214,8 +216,8 @@ public class RobotContainer {
         driverController.rightBumper().onTrue(shooter.toggleRunShooter());
         driverController.rightTrigger(.5).onTrue(shooter.toggleRunIndex());
         driverController.rightTrigger(.5).onFalse(shooter.toggleRunIndex());
-//        auxController.x().onTrue(shooter.incrementShooterDistanceAdjust(true));
-//        auxController.y().onTrue(shooter.incrementShooterDistanceAdjust(false));
+       auxController.x().onTrue(shooter.incrementShooterDistanceAdjust(true));
+       auxController.y().onTrue(shooter.incrementShooterDistanceAdjust(false));
 
         // intake.setDefaultCommand(intake.runStopRollers());
         // auxController.rightBumper().toggleOnFalse(intake.runRollers());
@@ -272,7 +274,7 @@ public class RobotContainer {
 
         // Define everything in pathNameTemp and pathsTemp
         for (int i=1; i<points.length; i++) {
-            if (points[i] != null || !points[i].equals("N/A")) {
+            if (points[i] != null && !points[i].equals("N/A")) {
                 pathNamesTemp[i] = autoName+"__"+points[i-1]+"_"+points[i];
                 pathsTemp[i] = auto.trajectory(pathNamesTemp[i]);
             } else {
@@ -299,8 +301,20 @@ public class RobotContainer {
 
         // Checks if the path requires shooting or intaking and puts it accordingly
         for (int i=1; i<paths.length; i++) {
-            if (pathNames[i].equals("Auto1__2_5") || pathNames[i].equals("Auto2__2_5") || pathNames[i].equals("Auto2__5_6a") || pathNames[i].equals("Auto2__2_3") || pathNames[i].equals("Auto3__5_6") || pathNames[i].equals("Auto1__2_3") || pathNames[i].equals("Auto2__2_4a") || pathNames[i].equals("Auto2__5_2") || pathNames[i].equals("Auto3__5_2") || pathNames[i].equals("Auto1__2_4")) {
-                // paths[i].active().whileTrue(intake.runRollers()); Will work once code is merged
+            if (
+                pathNames[i].equals("Auto1__2_5") ||
+                pathNames[i].equals("Auto2__2_5") ||
+                pathNames[i].equals("Auto2__5_6a") ||
+                pathNames[i].equals("Auto2__2_3") ||
+                pathNames[i].equals("Auto3__5_6") ||
+                pathNames[i].equals("Auto1__2_3") ||
+                pathNames[i].equals("Auto2__2_4a") ||
+                pathNames[i].equals("Auto2__5_2") ||
+                pathNames[i].equals("Auto3__5_2") ||
+                pathNames[i].equals("Auto1__2_4")
+            ) {
+                paths[i].active().onTrue(intake.toggleRollerFlag());
+                paths[i].done().onTrue(intake.toggleRollerFlag());
             }
         }
 
@@ -308,26 +322,38 @@ public class RobotContainer {
         if (points[0].equals("Preload")) {
             AutoTrajectory path = auto.trajectory(autoName+"__1_Preload");
             auto.active().onTrue(
-            Commands.sequence(
+                Commands.sequence(
                     path.resetOdometry(),
                     path.cmd()
                 )
             );
-            // path.done().onTrue(shooter.runShooterIdle().withTimeout(10)); Will work once code is merged
+            path.done().onTrue(
+                Commands.sequence(
+                    shooter.runShooterOn(),
+                    new WaitCommand(2),
+                    shooter.runIndexOn(),
+                    new WaitCommand(10),
+                    shooter.runShooterOff(),
+                    shooter.runIndexOff()
+                )
+            );
             return auto;
         }
+
         auto.active().onTrue(
             Commands.sequence(
                 paths[0].resetOdometry(),
                 paths[0].cmd()
             )
         );
+        
         // chain paths together, inserting shoot when needed
         for (int i = 1; i < paths.length; i++) {
             if (shouldShootAfter(pathNames[i-1])) {
                 paths[i-1].done().onTrue(
                     Commands.sequence(
-                        // shooter.runShooterIdle().withTimeout(2.0), Will work once code is merged
+                        shooter.toggleRunShooter(),
+                        new WaitCommand(2),
                         paths[i].cmd()
                     )
                 );

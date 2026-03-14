@@ -8,6 +8,13 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.Arrays;
+import java.util.function.DoubleSupplier;
+
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+
 import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
@@ -356,7 +363,7 @@ public class SwerveDrive extends SubsystemBase {
         // NOTE: We call runChassisSpeeds() directly so that the existing
         // ChassisSpeeds.fromFieldRelativeSpeeds() and discretize() logic applies,
         // matching exactly how teleop driving works.
-        submitChassisSpeeds(speeds, false, false);
+        submitChassisSpeeds(speeds, true, true);
     }
 
     public void addVisionMeasurement(Pose2d visionMeasurement, double timestamp, Matrix<N3,N1> stdDevs) {
@@ -390,6 +397,8 @@ public class SwerveDrive extends SubsystemBase {
 
     @Override
     public void periodic() {
+        Logger.recordOutput("Swerve/AimHubFlag", aimHubFlag.get());
+
         // updated all hardware inputs
         gyroIO.updateInputs(gyroIOInputs);
         Logger.processInputs("Swerve/Gyro", gyroIOInputs);
