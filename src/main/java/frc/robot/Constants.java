@@ -133,7 +133,7 @@ public class Constants {
 
         public static final double driveMotorReduction = 6.75; // l2 mk4i gear set
         
-        public static final int driveMotorCurrentLimit = 50;
+        public static final int driveMotorCurrentLimit = 30;
 
         public static final double driveEncoderPositionFactor = 2 * Math.PI / driveMotorReduction; // Rotor Rotations -> Wheel Radians
         public static final double driveEncoderVelocityFactor = (2 * Math.PI) / 60.0 / driveMotorReduction; // Rotor RPM -> Wheel Rad/Sec
@@ -197,7 +197,6 @@ public class Constants {
                 .idleMode(IdleMode.kBrake)
                 .smartCurrentLimit(turnMotorCurrentLimit)
                 .voltageCompensation(12)
-                .closedLoopRampRate(0.01)
                 .inverted(true);
             turnConfig.encoder
                 .positionConversionFactor(turnEncoderPositionFactor)
@@ -508,6 +507,7 @@ public class Constants {
         public static final double intakeMaxSpeed = 600; // rad/sec
 
         public static final double autoHomeCurrentThreshold = 30;
+        public static final int wristCurrentLimit = 40;
 
         public static final double wristMotorReduction = 32.0 / 1.0;
         public static final double rollerMotorReduction = 2.0 / 1.0;
@@ -546,6 +546,7 @@ public class Constants {
             wristSparkConfig
                 .idleMode(IdleMode.kBrake)
                 .voltageCompensation(12)
+                .smartCurrentLimit(wristCurrentLimit)
                 .inverted(false);
             wristSparkConfig.encoder
                 .positionConversionFactor(wristEncoderPositionFactor)
