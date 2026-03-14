@@ -2,7 +2,6 @@ package frc.robot.subsystems.shooter;
 
 import org.littletonrobotics.junction.Logger;
 
-import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -38,10 +37,10 @@ public class ShooterIOTalonFlywheel implements ShooterIO {
         });
     }
 
-    @Override
-    public void addToOrchestra(Orchestra orchestra, int track) {
-        orchestra.addInstrument(motor, track);
-    }
+    // @Override
+    // public void addToOrchestra(Orchestra orchestra, int track) {
+    //     orchestra.addInstrument(motor, track);
+    // }
 
     @Override
     public void setVelocityClosedLoop(double velocityRadPerSec) {

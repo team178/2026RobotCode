@@ -5,11 +5,7 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
-import com.ctre.phoenix6.Orchestra;
-
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.RobotState;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FieldConstants;
@@ -29,8 +25,8 @@ public class Shooter extends SubsystemBase {
 
     private final ShooterIOInputsAutoLogged[] shooterInputs = new ShooterIOInputsAutoLogged[5];
 
-    private final Orchestra orchestra;
-    private final Timer disabledTimer = new Timer();
+    // private final Orchestra orchestra;
+    // private final Timer disabledTimer = new Timer();
 
     private double shooterDistanceAdjust = 0;
     private boolean runShooterFlag = false;
@@ -43,17 +39,17 @@ public class Shooter extends SubsystemBase {
         this.feederIO = feederIO;
         this.indexIO = indexIO;
 
-        orchestra = new Orchestra();
+        // orchestra = new Orchestra();
 
         for (int i = 0; i < shooterInputs.length; i++) {
             shooterInputs[i] = new ShooterIOInputsAutoLogged();
         }
 
-        shooterIOL.addToOrchestra(orchestra, 2);
-        shooterIOM.addToOrchestra(orchestra, 1);
-        shooterIOR.addToOrchestra(orchestra, 0);
+        // shooterIOL.addToOrchestra(orchestra, 2);
+        // shooterIOM.addToOrchestra(orchestra, 1);
+        // shooterIOR.addToOrchestra(orchestra, 0);
 
-        orchestra.loadMusic("fugue.chrp");
+        // orchestra.loadMusic("fugue.chrp");
     }
 
     private void shootWithDistance(double distanceMeters) {
@@ -190,24 +186,24 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if (RobotState.isDisabled()) {
-            if (!disabledTimer.isRunning()) {
-                disabledTimer.start();
-            }
+        // if (RobotState.isDisabled()) {
+        //     if (!disabledTimer.isRunning()) {
+        //         disabledTimer.start();
+        //     }
 
-            if (disabledTimer.get() >= 30.0) {
-                if (!orchestra.isPlaying()) {
-                    orchestra.play();
-                }
-            }
-        } else {
-            orchestra.stop();
-            disabledTimer.stop();
-            disabledTimer.reset();
-        }
+        //     if (disabledTimer.get() >= 30.0) {
+        //         if (!orchestra.isPlaying()) {
+        //             orchestra.play();
+        //         }
+        //     }
+        // } else {
+        //     orchestra.stop();
+        //     disabledTimer.stop();
+        //     disabledTimer.reset();
+        // }
 
-        Logger.recordOutput("Shooter/OrchestraPlaying", orchestra.isPlaying());
-        Logger.recordOutput("Shooter/DisabledTimer", (int) disabledTimer.get());
+        // Logger.recordOutput("Shooter/OrchestraPlaying", orchestra.isPlaying());
+        // Logger.recordOutput("Shooter/DisabledTimer", (int) disabledTimer.get());
 
         if (runShooterFlag) {
             shooterIOL.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
