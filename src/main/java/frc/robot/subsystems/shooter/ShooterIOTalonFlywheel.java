@@ -18,6 +18,9 @@ public class ShooterIOTalonFlywheel implements ShooterIO {
 
     public final LoggedTunableControlConstants controlConstants = ShooterConstants.flywheelConstants;
 
+    public final double shooterEpsilon = 2;
+    public double setpointRad = 0;
+
     public ShooterIOTalonFlywheel(int CANID) {
         motor = new TalonFX(CANID);
         this.CANID = CANID;
@@ -46,6 +49,8 @@ public class ShooterIOTalonFlywheel implements ShooterIO {
     public void setVelocityClosedLoop(double velocityRadPerSec) {
         Logger.recordOutput("Shooter/Flywheel/" + CANID + "/Setpoint", velocityRadPerSec);
 
+        setpointRad = velocityRadPerSec;
+
         motor.setControl(
             velocityRequest.withVelocity(Units.radiansToRotations(velocityRadPerSec)).withSlot(0)
         );
@@ -63,6 +68,8 @@ public class ShooterIOTalonFlywheel implements ShooterIO {
 
     public void updateInputs(ShooterIOInputs inputs){
         inputs.velocityRadPerSec = motor.getVelocity().getValueAsDouble() * 2 * Math.PI;
+
+        Logger.recordOutput("Shooter/Flywheel/" + CANID + "/AtSetpoint", Math.abs(inputs.velocityRadPerSec - setpointRad) <  shooterEpsilon);
 
         inputs.appliedVolts = motor.getMotorVoltage().getValueAsDouble();
         inputs.supplyCurrentAmps = motor.getSupplyCurrent().getValueAsDouble();
