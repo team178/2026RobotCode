@@ -23,7 +23,7 @@ public class Robot extends LoggedRobot {
     private final RobotContainer m_robotContainer;
 
     public Robot() {
-        Logger.recordMetadata("Robot", "TestBot");
+        Logger.recordMetadata("Robot", "CompBot");
         Logger.recordMetadata("Season", "2026 REBUILT");
         Logger.recordMetadata("RobotMode", Constants.currentMode.equals(Constants.RobotMode.REAL) ? "REAL" : (
             Constants.currentMode.equals(Constants.RobotMode.SIM) ? "SIM" : "REPLAY"
