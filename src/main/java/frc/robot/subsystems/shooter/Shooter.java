@@ -5,7 +5,9 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
+import edu.wpi.first.hal.simulation.DriverStationDataJNI;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FieldConstants;
@@ -31,6 +33,7 @@ public class Shooter extends SubsystemBase {
     private double shooterDistanceAdjust = 0;
     private boolean runShooterFlag = false;
     private boolean runIndexFlag = false;
+    private boolean isAutonomous = true;
 
     public Shooter(ShooterIO shooterIOL, ShooterIO shooterIOM, ShooterIO shooterIOR, ShooterIO feederIO, ShooterIO indexIO) {
         this.shooterIOL = shooterIOL;
@@ -208,6 +211,21 @@ public class Shooter extends SubsystemBase {
         });
     }
 
+    public Command runShooterAutonomous(double velocity) {
+        return runOnce(() -> {
+            shooterIOL.setVelocityClosedLoop(velocity);
+            shooterIOM.setVelocityClosedLoop(velocity);
+            shooterIOR.setVelocityClosedLoop(velocity);
+        });
+    }
+
+    public Command runOtherAutonomous(double feederVel, double indexVel) {
+        return runOnce(() -> {
+            feederIO.setVelocityClosedLoop(feederVel);
+            indexIO.setVelocityClosedLoop(indexVel);
+        });
+    }
+
     @Override
     public void periodic() {
         // if (RobotState.isDisabled()) {
@@ -228,22 +246,24 @@ public class Shooter extends SubsystemBase {
 
         // Logger.recordOutput("Shooter/OrchestraPlaying", orchestra.isPlaying());
         // Logger.recordOutput("Shooter/DisabledTimer", (int) disabledTimer.get());
-
-        if (runShooterFlag) {
-            shooterIOL.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
-            shooterIOM.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
-            shooterIOR.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
-        } else {
-            shooterIOL.setOpenLoop(0);
-            shooterIOM.setOpenLoop(0);
-            shooterIOR.setOpenLoop(0);
-        }
-        if (runIndexFlag) {
-             feederIO.setVelocityClosedLoop(loggedFeederRadPerSec.get());
-             indexIO.setVelocityClosedLoop(loggedIndexRadPerSec.get());
-        } else {
-            feederIO.setOpenLoop(0);
-            indexIO.setOpenLoop(0);
+        if(!isAutonomous || !DriverStation.isAutonomous()){
+            isAutonomous = false;
+            if (runShooterFlag) {
+                shooterIOL.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
+                shooterIOM.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
+                shooterIOR.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
+            } else {
+                shooterIOL.setOpenLoop(0);
+                shooterIOM.setOpenLoop(0);
+                shooterIOR.setOpenLoop(0);
+            }
+            if (runIndexFlag) {
+                feederIO.setVelocityClosedLoop(loggedFeederRadPerSec.get());
+                indexIO.setVelocityClosedLoop(loggedIndexRadPerSec.get());
+            } else {
+                feederIO.setOpenLoop(0);
+                indexIO.setOpenLoop(0);
+            }
         }
 
         Logger.recordOutput("Shooter/ShooterRunning", runShooterFlag);

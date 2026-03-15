@@ -380,6 +380,12 @@ public class RobotContainer {
     // -------------------------------------------------------
     public Command getAutonomousCommand() {
         // return buildAuto().cmd();
-        return new WaitCommand(10);
+        // return new WaitCommand(10);
+        // Command testCommand = new 
+        return Commands.sequence(
+            shooter.runShooterAutonomous(340),
+            swerve.runXSetTime(.2,2),
+            shooter.runOtherAutonomous(5000,5000)
+        );
     }
 }

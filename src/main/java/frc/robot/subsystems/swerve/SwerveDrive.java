@@ -264,6 +264,13 @@ public class SwerveDrive extends SubsystemBase {
         }).until(() -> false).withTimeout(0.2);
     }
 
+    public Command runXSetTime(double speedMult, double time) {
+        return run(() -> {
+            ChassisSpeeds speeds = new ChassisSpeeds(SwerveConstants.kMagVelLimit * speedMult, 0, 0);
+            submitChassisSpeeds(speeds, false, false);
+        }).until(() -> false).withTimeout(time);
+    }
+
     public Command runOmegaSetTime(double speedMult) {
         return run(() -> {
             ChassisSpeeds speeds = new ChassisSpeeds(0, 0, SwerveConstants.kRotVelLimit * speedMult);
