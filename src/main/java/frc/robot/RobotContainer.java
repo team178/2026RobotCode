@@ -5,12 +5,15 @@
 
 package frc.robot;
 
+import java.util.function.Supplier;
+
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
@@ -108,7 +111,8 @@ public class RobotContainer {
                     new ShooterIOTalonFlywheel(ShooterConstants.shooterMMotorCANID),
                     new ShooterIOTalonFlywheel(ShooterConstants.shooterRMotorCANID),
                     new ShooterIOSparkFeeder(ShooterConstants.feederMotorCANID),
-                    new ShooterIOSparkIndex(ShooterConstants.indexMotorCANID)
+                    new ShooterIOSparkIndex(ShooterConstants.indexMotorCANID),
+                    swerve::getPose
                 );
                 intake = new Intake(
                     new RollerIOSpark(),
@@ -138,7 +142,8 @@ public class RobotContainer {
                     new ShooterIO() {},
                     new ShooterIO() {},
                     new ShooterIO() {},
-                    new ShooterIO() {}
+                    new ShooterIO() {},
+                    () -> new Pose2d()
                 );
                 intake = new Intake(
                     new RollerIO() {},
@@ -168,7 +173,8 @@ public class RobotContainer {
                     new ShooterIO() {},
                     new ShooterIO() {},
                     new ShooterIO() {},
-                    new ShooterIO() {}
+                    new ShooterIO() {},
+                    () -> new Pose2d()
                 );
                 intake = new Intake(
                     new RollerIO() {},

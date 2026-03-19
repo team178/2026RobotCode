@@ -35,12 +35,16 @@ public class Shooter extends SubsystemBase {
     private boolean runIndexFlag = false;
     private boolean isAutonomous = true;
 
-    public Shooter(ShooterIO shooterIOL, ShooterIO shooterIOM, ShooterIO shooterIOR, ShooterIO feederIO, ShooterIO indexIO) {
+    private final Supplier<Pose2d> robotPoseSupplier;
+
+    public Shooter(ShooterIO shooterIOL, ShooterIO shooterIOM, ShooterIO shooterIOR, ShooterIO feederIO, ShooterIO indexIO, Supplier<Pose2d> robotPoseSupplier) {
         this.shooterIOL = shooterIOL;
         this.shooterIOM = shooterIOM;
         this.shooterIOR = shooterIOR;
         this.feederIO = feederIO;
         this.indexIO = indexIO;
+
+        this.robotPoseSupplier = robotPoseSupplier;
 
         // orchestra = new Orchestra();
 
@@ -249,9 +253,16 @@ public class Shooter extends SubsystemBase {
         if(!isAutonomous || !DriverStation.isAutonomous()){
             isAutonomous = false;
             if (runShooterFlag) {
-                shooterIOL.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
-                shooterIOM.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
-                shooterIOR.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
+                // shooterIOL.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
+                // shooterIOM.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
+                // shooterIOR.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
+
+                Pose2d robotPose = robotPoseSupplier.get();
+                Pose2d hubPose = FieldConstants.getHubCenter();
+                
+                double hubDistance = robotPose.getTranslation().getDistance(hubPose.getTranslation());
+
+                shootWithDistance(hubDistance);
             } else {
                 shooterIOL.stop();
                 shooterIOM.stop();
