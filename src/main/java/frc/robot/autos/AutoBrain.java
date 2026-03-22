@@ -130,12 +130,12 @@ public class AutoBrain {
         if (shouldShootAfter(lastEP)) {
             // NEW SHOOTER LOGIC
             paths[paths.length - 1].done().onTrue(Commands.sequence(
-                swerveSubsystem.runToggleToXPosition(),
+                swerveSubsystem.setImmediateCrossbuckOverride(true),
                 swerveSubsystem.runToggleAimHub(),
                 new WaitCommand(1),
                 shooterSubsystem.toggleRunIndex(),
                 new WaitCommand(2),
-                swerveSubsystem.runToggleToXPosition(),
+                swerveSubsystem.setImmediateCrossbuckOverride(false),
                 shooterSubsystem.toggleRunIndex(),
                 shooterSubsystem.toggleRunShooter()
             ));
