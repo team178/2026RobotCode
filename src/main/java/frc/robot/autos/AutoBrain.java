@@ -97,28 +97,35 @@ public class AutoBrain {
 
         auto.active().onTrue(Commands.sequence(
             paths[0].resetOdometry(),
-            shooterSubsystem.toggleRunShooter(),
+            // shooterSubsystem.toggleRunShooter(),
             paths[0].cmd()
         ));
 
         for (int i = 0; i < paths.length - 1; i++) {
             String EP = points[i + 1];
             String pathN = pathNames[i];
+            if (shouldIntakeDuring(pathN)) {
+                paths[i].active().onTrue(intakeSubsystem.toggleRollerFlag());
+            }
+
             if (shouldShootAfter(EP)) {
                 paths[i].done().onTrue(Commands.sequence(
-                    swerveSubsystem.runStopDrive(),        // FIX: stop before aiming at each shoot point
+                    shouldIntakeDuring(pathN) ? intakeSubsystem.toggleRollerFlag() : Commands.none(),
+                    swerveSubsystem.runStopDrive(),
                     swerveSubsystem.setImmediateCrossbuckOverride(true),
-                    swerveSubsystem.runToggleAimHub(),
+                    swerveSubsystem.runToggleAimHub(),       // aim ON
+                    shooterSubsystem.toggleRunShooter(),
                     new WaitCommand(1),
                     shooterSubsystem.toggleRunIndex(),
-                    new WaitCommand(6),                    // FIX: 6 seconds per path spec
-                    swerveSubsystem.setImmediateCrossbuckOverride(false),
+                    new WaitCommand(6),
                     shooterSubsystem.toggleRunIndex(),
                     shooterSubsystem.toggleRunShooter(),
+                    swerveSubsystem.runToggleAimHub(),       // aim OFF
+                    swerveSubsystem.setImmediateCrossbuckOverride(false),
                     paths[i + 1].cmd()
                 ));
-            } else if (shouldIntakeDuring(pathN)) {
-                paths[i].active().onTrue(intakeSubsystem.toggleRollerFlag());
+            } 
+            else if (shouldIntakeDuring(pathN)) {
                 paths[i].done().onTrue(Commands.sequence(
                     intakeSubsystem.toggleRollerFlag(),
                     paths[i + 1].cmd()
@@ -132,26 +139,32 @@ public class AutoBrain {
         AutoTrajectory lastPath = paths[paths.length - 1];
         String lastPathName = pathNames[pathNames.length - 1];
 
+        if (shouldIntakeDuring(lastPathName)) {
+            lastPath.active().onTrue(intakeSubsystem.toggleRollerFlag());
+        }
+
         if (shouldShootAfter(lastEP)) {
             paths[paths.length - 1].done().onTrue(Commands.sequence(
-                swerveSubsystem.runStopDrive(),            // FIX: stop before final shot
+                shouldIntakeDuring(lastPathName) ? intakeSubsystem.toggleRollerFlag() : Commands.none(),
+                swerveSubsystem.runStopDrive(),
                 swerveSubsystem.setImmediateCrossbuckOverride(true),
-                swerveSubsystem.runToggleAimHub(),
+                swerveSubsystem.runToggleAimHub(),       // aim ON
+                shooterSubsystem.toggleRunShooter(),
                 new WaitCommand(1),
                 shooterSubsystem.toggleRunIndex(),
-                new WaitCommand(6),                        // FIX: 6 seconds per path spec
-                swerveSubsystem.setImmediateCrossbuckOverride(false),
+                new WaitCommand(6),
                 shooterSubsystem.toggleRunIndex(),
-                shooterSubsystem.toggleRunShooter()
+                shooterSubsystem.toggleRunShooter(),
+                swerveSubsystem.runToggleAimHub(),       // aim OFF
+                swerveSubsystem.setImmediateCrossbuckOverride(false)
             ));
-        } else if (shouldIntakeDuring(lastPathName)) {
-            lastPath.active().onTrue(intakeSubsystem.toggleRollerFlag());
+        }
+        else if (shouldIntakeDuring(lastPathName)) {
             lastPath.done().onTrue(Commands.sequence(
                 intakeSubsystem.toggleRollerFlag(),
-                swerveSubsystem.runStopDrive()             // FIX: stop after final intake path
+                swerveSubsystem.runStopDrive()
             ));
         } else {
-            // FIX: catch-all stop for any path that doesn't shoot or intake at the end
             lastPath.done().onTrue(swerveSubsystem.runStopDrive());
         }
 
@@ -167,6 +180,6 @@ public class AutoBrain {
         return path.equals("Auto2__2_5") || path.equals("Auto2__5_6a") || path.equals("Auto2__2_3") ||
             path.equals("Auto3__5_6") || path.equals("Auto1__2_3") || path.equals("Auto2__2_4a") ||
             path.equals("Auto2__5_2") || path.equals("Auto1__2_5") || path.equals("Auto3__5_2") ||
-            path.equals("Auto1__2_4");
+            path.equals("Auto1__2_4") || path.equals("Auto1__4_11");
     }
 }
