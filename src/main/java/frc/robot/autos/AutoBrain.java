@@ -97,7 +97,7 @@ public class AutoBrain {
 
         auto.active().onTrue(Commands.sequence(
             paths[0].resetOdometry(),
-            // shooterSubsystem.toggleRunShooter(),
+            shooterSubsystem.toggleRunShooter(),
             paths[0].cmd()
         ));
 
@@ -114,12 +114,10 @@ public class AutoBrain {
                     swerveSubsystem.runStopDrive(),
                     swerveSubsystem.setImmediateCrossbuckOverride(true),
                     swerveSubsystem.runToggleAimHub(),       // aim ON
-                    shooterSubsystem.toggleRunShooter(),
                     new WaitCommand(1),
                     shooterSubsystem.toggleRunIndex(),
                     new WaitCommand(6),
                     shooterSubsystem.toggleRunIndex(),
-                    shooterSubsystem.toggleRunShooter(),
                     swerveSubsystem.runToggleAimHub(),       // aim OFF
                     swerveSubsystem.setImmediateCrossbuckOverride(false),
                     paths[i + 1].cmd()
@@ -149,14 +147,13 @@ public class AutoBrain {
                 swerveSubsystem.runStopDrive(),
                 swerveSubsystem.setImmediateCrossbuckOverride(true),
                 swerveSubsystem.runToggleAimHub(),       // aim ON
-                shooterSubsystem.toggleRunShooter(),
                 new WaitCommand(1),
                 shooterSubsystem.toggleRunIndex(),
                 new WaitCommand(6),
                 shooterSubsystem.toggleRunIndex(),
-                shooterSubsystem.toggleRunShooter(),
                 swerveSubsystem.runToggleAimHub(),       // aim OFF
-                swerveSubsystem.setImmediateCrossbuckOverride(false)
+                swerveSubsystem.setImmediateCrossbuckOverride(false),
+                shooterSubsystem.toggleRunShooter()
             ));
         }
         else if (shouldIntakeDuring(lastPathName)) {
@@ -180,6 +177,7 @@ public class AutoBrain {
         return path.equals("Auto2__2_5") || path.equals("Auto2__5_6a") || path.equals("Auto2__2_3") ||
             path.equals("Auto3__5_6") || path.equals("Auto1__2_3") || path.equals("Auto2__2_4a") ||
             path.equals("Auto2__5_2") || path.equals("Auto1__2_5") || path.equals("Auto3__5_2") ||
-            path.equals("Auto1__2_4") || path.equals("Auto1__4_11");
+            path.equals("Auto1__2_4") || path.equals("Auto1__4_11") || path.equals("Auto1__2_9") || 
+            path.equals("Auto3__5_10") || path.equals("Auto1__1_3") || path.equals("Auto1__5_2");
     }
 }
