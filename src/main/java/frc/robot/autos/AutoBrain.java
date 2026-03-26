@@ -57,7 +57,7 @@ public class AutoBrain {
 
         AutoRoutine auto = autoFactory.newRoutine("auto");
 
-        // FIX: Trigger preload branch if path is empty OR only one waypoint provided
+        // Trigger preload branch if path is empty OR only one waypoint provided
         if (pathName.isEmpty() || points.length < 2) {
             if (!pathName.isEmpty() && points.length < 2) {
                 System.out.println("Not enough points");
@@ -67,17 +67,18 @@ public class AutoBrain {
             AutoTrajectory path = auto.trajectory(autoNum + "__1_Preload");
             auto.active().onTrue(Commands.sequence(
                 path.resetOdometry(),
-                shooterSubsystem.toggleRunShooter(),       // FIX: start shooter before path
+                shooterSubsystem.toggleRunShooter(),       // start shooter before path
                 path.cmd(),
-                swerveSubsystem.runStopDrive(),            // FIX: explicitly stop drive after trajectory
+                swerveSubsystem.runStopDrive(),            // explicitly stop drive after trajectory
                 swerveSubsystem.setImmediateCrossbuckOverride(true),
-                swerveSubsystem.runToggleAimHub(),
+                swerveSubsystem.runToggleAimHub(),         // aim ON
                 new WaitCommand(1),                        // aim settling time
-                shooterSubsystem.toggleRunIndex(),
-                new WaitCommand(6),                        // FIX: 6 seconds per path spec
+                shooterSubsystem.toggleRunIndex(),         // indexer ON
+                new WaitCommand(6),
+                shooterSubsystem.toggleRunIndex(),         // indexer OFF
+                swerveSubsystem.runToggleAimHub(),         // aim OFF
                 swerveSubsystem.setImmediateCrossbuckOverride(false),
-                shooterSubsystem.toggleRunIndex(),
-                shooterSubsystem.toggleRunShooter()
+                shooterSubsystem.toggleRunShooter()        // shooter OFF
             ));
             return auto;
         }
@@ -104,28 +105,36 @@ public class AutoBrain {
         for (int i = 0; i < paths.length - 1; i++) {
             String EP = points[i + 1];
             String pathN = pathNames[i];
+
+            // Pre-spin shooter at the START of any segment that needs it ready at the end
+            if (shouldSpinShooterDuring(pathN)) {
+                paths[i].active().onTrue(shooterSubsystem.toggleRunShooter());
+            }
+
+            // Run intake rollers at the START of any intake segment
             if (shouldIntakeDuring(pathN)) {
                 paths[i].active().onTrue(intakeSubsystem.toggleRollerFlag());
             }
 
             if (shouldShootAfter(EP)) {
                 paths[i].done().onTrue(Commands.sequence(
+                    // Stop intake if it was running during this segment
                     shouldIntakeDuring(pathN) ? intakeSubsystem.toggleRollerFlag() : Commands.none(),
                     swerveSubsystem.runStopDrive(),
                     swerveSubsystem.setImmediateCrossbuckOverride(true),
-                    swerveSubsystem.runToggleAimHub(),       // aim ON
-                    shooterSubsystem.toggleRunShooter(),
-                    new WaitCommand(1),
-                    shooterSubsystem.toggleRunIndex(),
+                    swerveSubsystem.runToggleAimHub(),               // aim ON
+                    // Only toggle shooter ON here if it was NOT already pre-spun during travel
+                    shouldSpinShooterDuring(pathN) ? Commands.none() : shooterSubsystem.toggleRunShooter(),
+                    new WaitCommand(1),                              // aim settling time
+                    shooterSubsystem.toggleRunIndex(),               // indexer ON
                     new WaitCommand(6),
-                    shooterSubsystem.toggleRunIndex(),
-                    shooterSubsystem.toggleRunShooter(),
-                    swerveSubsystem.runToggleAimHub(),       // aim OFF
+                    shooterSubsystem.toggleRunIndex(),               // indexer OFF
+                    shooterSubsystem.toggleRunShooter(),             // shooter OFF
+                    swerveSubsystem.runToggleAimHub(),               // aim OFF
                     swerveSubsystem.setImmediateCrossbuckOverride(false),
                     paths[i + 1].cmd()
                 ));
-            } 
-            else if (shouldIntakeDuring(pathN)) {
+            } else if (shouldIntakeDuring(pathN)) {
                 paths[i].done().onTrue(Commands.sequence(
                     intakeSubsystem.toggleRollerFlag(),
                     paths[i + 1].cmd()
@@ -139,27 +148,34 @@ public class AutoBrain {
         AutoTrajectory lastPath = paths[paths.length - 1];
         String lastPathName = pathNames[pathNames.length - 1];
 
+        // Pre-spin shooter at the START of the last segment if needed
+        if (shouldSpinShooterDuring(lastPathName)) {
+            lastPath.active().onTrue(shooterSubsystem.toggleRunShooter());
+        }
+
+        // Run intake rollers at the START of the last segment if needed
         if (shouldIntakeDuring(lastPathName)) {
             lastPath.active().onTrue(intakeSubsystem.toggleRollerFlag());
         }
 
         if (shouldShootAfter(lastEP)) {
             paths[paths.length - 1].done().onTrue(Commands.sequence(
+                // Stop intake if it was running during this last segment
                 shouldIntakeDuring(lastPathName) ? intakeSubsystem.toggleRollerFlag() : Commands.none(),
                 swerveSubsystem.runStopDrive(),
                 swerveSubsystem.setImmediateCrossbuckOverride(true),
-                swerveSubsystem.runToggleAimHub(),       // aim ON
-                shooterSubsystem.toggleRunShooter(),
-                new WaitCommand(1),
-                shooterSubsystem.toggleRunIndex(),
+                swerveSubsystem.runToggleAimHub(),                   // aim ON
+                // Only toggle shooter ON here if it was NOT already pre-spun during travel
+                shouldSpinShooterDuring(lastPathName) ? Commands.none() : shooterSubsystem.toggleRunShooter(),
+                new WaitCommand(1),                                  // aim settling time
+                shooterSubsystem.toggleRunIndex(),                   // indexer ON
                 new WaitCommand(6),
-                shooterSubsystem.toggleRunIndex(),
-                shooterSubsystem.toggleRunShooter(),
-                swerveSubsystem.runToggleAimHub(),       // aim OFF
+                shooterSubsystem.toggleRunIndex(),                   // indexer OFF
+                shooterSubsystem.toggleRunShooter(),                 // shooter OFF
+                swerveSubsystem.runToggleAimHub(),                   // aim OFF
                 swerveSubsystem.setImmediateCrossbuckOverride(false)
             ));
-        }
-        else if (shouldIntakeDuring(lastPathName)) {
+        } else if (shouldIntakeDuring(lastPathName)) {
             lastPath.done().onTrue(Commands.sequence(
                 intakeSubsystem.toggleRollerFlag(),
                 swerveSubsystem.runStopDrive()
@@ -169,6 +185,17 @@ public class AutoBrain {
         }
 
         return auto;
+    }
+
+    /**
+     * Returns true if the shooter flywheel should begin spinning at the START
+     * of the given path segment, so it is up to speed by the time the robot
+     * reaches the shoot waypoint at the end of that segment.
+     *
+     * Add any path here where pre-spinning the shooter during travel is required.
+     */
+    private boolean shouldSpinShooterDuring(String path) {
+        return path.equals("Auto3__10_6");
     }
 
     private boolean shouldShootAfter(String EP) {
