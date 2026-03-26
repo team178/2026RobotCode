@@ -115,7 +115,7 @@ public class AutoBrain {
                     swerveSubsystem.setImmediateCrossbuckOverride(true),
                     swerveSubsystem.runToggleAimHub(),       // aim ON
                     shooterSubsystem.toggleRunShooter(),
-                    new WaitCommand(1),
+                    new WaitCommand(5),
                     shooterSubsystem.toggleRunIndex(),
                     new WaitCommand(6),
                     shooterSubsystem.toggleRunIndex(),
@@ -150,7 +150,7 @@ public class AutoBrain {
                 swerveSubsystem.setImmediateCrossbuckOverride(true),
                 swerveSubsystem.runToggleAimHub(),       // aim ON
                 shooterSubsystem.toggleRunShooter(),
-                new WaitCommand(1),
+                new WaitCommand(5),
                 shooterSubsystem.toggleRunIndex(),
                 new WaitCommand(6),
                 shooterSubsystem.toggleRunIndex(),
