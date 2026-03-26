@@ -92,9 +92,9 @@ public class SwerveDrive extends SubsystemBase {
 
         aimHubFlag = new AtomicBoolean(false);
 
-        trajVXController = new PIDController(10, 0, 0);
-        trajVYController = new PIDController(10, 0, 0);
-        trajHeadingController = new PIDController(5, 0, 0);
+        trajVXController = new PIDController(8, 0, 0);
+        trajVYController = new PIDController(8, 0, 0);
+        trajHeadingController = new PIDController(3, 0, 0);
         trajHeadingController.enableContinuousInput(0, 2 * Math.PI);
 
         lastMove = Timer.getFPGATimestamp();

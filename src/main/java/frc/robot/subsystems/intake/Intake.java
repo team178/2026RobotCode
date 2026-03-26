@@ -139,9 +139,9 @@ public class Intake extends SubsystemBase {
         if (isWristMovingDown && isWristMovingUp) {
             wristIO.setOpenLoop(0);
         } else if (isWristMovingDown) {
-            wristIO.setOpenLoop(1);
+            wristIO.setOpenLoop(3);
         } else if (isWristMovingUp) {
-            wristIO.setOpenLoop(-1);
+            wristIO.setOpenLoop(-3);
         } else {
             wristIO.setOpenLoop(0);
         }
