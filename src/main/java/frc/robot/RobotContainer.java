@@ -47,9 +47,6 @@ public class RobotContainer {
     private final Shooter shooter;
     private final Intake intake;
 
-    private final LoggedNetworkBoolean runAutoBoolean = new LoggedNetworkBoolean("Auto/RunAuto", true);
-    private final LoggedNetworkBoolean runAutoSimple = new LoggedNetworkBoolean("Auto/RunAutoSiple", false);
-
     private final AutoBrain autoBrain;
 
     public RobotContainer() {
@@ -196,29 +193,6 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        // if(runAutoSimple)
-        // if(!runAutoSimple.get()) {
-            // return autoBrain.buildAuto().cmd().onlyWhile(DriverStation::isAutonomous);
-        // }
-        // return Commands.sequence(
-        //     shooter.toggleRunShooter(),
-        //     // intake.toggleRollerFlag,
-        //     swerve.runXSetTime(0.1,2)
-        //     swerve.runToggleAimHub(),
-        //     new WaitCommand(1)
-        //     // shooter.
-        // );
-        return
-            autoBrain.buildAuto().cmd();
-        
-        // return Commands.sequence(
-        //     // intake.toggleWristPosFlag(true),
-        //     // new WaitCommand(1.5),
-        //     // intake.toggleWristPosFlag(false),
-        //     // intake.toggleRollerFlag(true),
-        //     shooter.runShooterOn(),
-        //     autoBrain.buildAuto().cmd().andThen(new PrintCommand("auto command done!"))
-        // ).withName("autoSeqenceShooter");
-        // return Commands.none();
+        return autoBrain.buildAuto().cmd();
     }
 }
