@@ -68,7 +68,9 @@ public class RobotContainer {
                 vision = new Vision(
                     swerve::addVisionMeasurement,
                     new VisionIOPhoton(VisionConstants.camConfigs[0]),
-                    new VisionIOPhoton(VisionConstants.camConfigs[1])
+                    new VisionIOPhoton(VisionConstants.camConfigs[1]),
+                    new VisionIOPhoton(VisionConstants.camConfigs[2]),
+                    new VisionIOPhoton(VisionConstants.camConfigs[3])
                 );
                 shooter = new Shooter(
                     new ShooterIOTalonFlywheel(ShooterConstants.shooterLMotorCANID),
