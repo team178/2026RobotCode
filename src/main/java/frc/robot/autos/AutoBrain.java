@@ -116,9 +116,11 @@ public class AutoBrain {
                     paths[i + 1].cmd().withName("EP_PathSequence"),
                     new PrintCommand("done with point")
                 ));
-            } else {
-                paths[i].done().onTrue(paths[i + 1].cmd());
+            } 
+            if (shouldIntakeDuring(pathN)) {
+                paths[i].done().onTrue(intakeSubsystem.toggleRollerFlag(false));
             }
+            paths[i].done().onTrue(paths[i + 1].cmd());
         }
 
         String lastEP = points[points.length - 1];
