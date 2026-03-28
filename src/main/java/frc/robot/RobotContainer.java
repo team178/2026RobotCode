@@ -6,25 +6,14 @@ package frc.robot;
 
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
-import choreo.auto.AutoFactory;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StringPublisher;
-import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.autos.AutoBrain;
-import frc.robot.subsystems.climb.Climb;
-import frc.robot.subsystems.climb.ClimbIO;
-import frc.robot.subsystems.climb.ClimbIOSpark;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.RollerIO;
 import frc.robot.subsystems.intake.RollerIOSpark;
@@ -53,7 +42,6 @@ public class RobotContainer {
     private final Vision vision;
     private final Shooter shooter;
     private final Intake intake;
-    private final Climb climb;
 
     private final LoggedNetworkBoolean runAutoBoolean = new LoggedNetworkBoolean("Auto/RunAuto", true);
 
@@ -91,9 +79,6 @@ public class RobotContainer {
                     new RollerIOSpark(),
                     new WristIOSpark()
                 );
-                climb = new Climb(
-                    new ClimbIOSpark()
-                );
                 break;
             case SIM:
                 swerve = new SwerveDrive(
@@ -116,14 +101,11 @@ public class RobotContainer {
                     new ShooterIO() {},
                     new ShooterIO() {},
                     new ShooterIO() {},
-                    () -> new Pose2d()
+                    Pose2d::new
                 );
                 intake = new Intake(
                     new RollerIO() {},
                     new WristIO() {}
-                );
-                climb = new Climb(
-                    new ClimbIO() {}
                 );
                 break;
             default:
@@ -147,14 +129,11 @@ public class RobotContainer {
                     new ShooterIO() {},
                     new ShooterIO() {},
                     new ShooterIO() {},
-                    () -> new Pose2d()
+                    Pose2d::new
                 );
                 intake = new Intake(
                     new RollerIO() {},
                     new WristIO() {}
-                );
-                climb = new Climb(
-                    new ClimbIO() {}
                 );
                 break;
         }
