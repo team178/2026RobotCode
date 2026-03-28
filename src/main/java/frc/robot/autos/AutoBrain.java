@@ -38,8 +38,8 @@ public class AutoBrain {
         var topic = NetworkTableInstance.getDefault()
             .getStringTopic("/SmartDashboard/Auto Path");
         autoPathPublisher = topic.publish();
-        autoPathPublisher.set("1,2,5,6"); // default shown in textbox
-        autoPathSubscriber = topic.subscribe("1,2,5,6");
+        autoPathPublisher.set("1,2,9,4"); // default shown in textbox
+        autoPathSubscriber = topic.subscribe("1,2,9,4");
 
         autoFactory = new AutoFactory(
             swerveSubsystem::getPose,
@@ -68,12 +68,11 @@ public class AutoBrain {
             AutoTrajectory path = auto.trajectory(autoNum + "__1_Preload");
             auto.active().onTrue(Commands.sequence(
                 path.resetOdometry(),
-                shooterSubsystem.toggleRunShooter(),       // FIX: start shooter before path
-                path.cmd(),
-                swerveSubsystem.runStopDrive(),            // FIX: explicitly stop drive after trajectory
-                swerveSubsystem.runToggleAimHub(),
-                new WaitCommand(0.5),                        // aim settling time
-                shooterSubsystem.toggleRunIndex()
+                path.cmd().withName("preloadPathSequence"),
+                swerveSubsystem.runStopDrive(),
+                swerveSubsystem.runToggleAimHub(true),
+                new WaitCommand(1),                        // aim settling time
+                shooterSubsystem.toggleRunIndex(true)
             ));
             return auto;
         }
@@ -93,9 +92,11 @@ public class AutoBrain {
 
         auto.active().onTrue(Commands.sequence(
             paths[0].resetOdometry(),
-            shooterSubsystem.toggleRunShooter(),
+            shooterSubsystem.runShooterOn(),
             intakeSubsystem.toggleWristPosFlag(true),
-            intakeSubsystem.toggleRollerFlag(),
+            new WaitCommand(1.5),
+            intakeSubsystem.toggleWristPosFlag(false),
+            intakeSubsystem.toggleRollerFlag(true),
             paths[0].cmd()
         ));
 
@@ -105,14 +106,15 @@ public class AutoBrain {
 
             if (shouldShootAfter(EP)) {
                 paths[i].done().onTrue(Commands.sequence(
-                    swerveSubsystem.runToggleAimHub(),       // aim ON
+                    swerveSubsystem.runToggleAimHub(true),       // aim ON
                     swerveSubsystem.runStopDrive(),
                     new WaitCommand(0.5),
-                    shooterSubsystem.toggleRunIndex(),
+                    shooterSubsystem.toggleRunIndex(true),
                     new WaitCommand(6),
-                    shooterSubsystem.toggleRunIndex(),
-                    swerveSubsystem.runToggleAimHub(),       // aim OFF
-                    paths[i + 1].cmd()
+                    shooterSubsystem.toggleRunIndex(false),
+                    swerveSubsystem.runToggleAimHub(false),
+                    paths[i + 1].cmd().withName("EP_PathSequence"),
+                    new PrintCommand("done with point")
                 ));
             } else {
                 paths[i].done().onTrue(paths[i + 1].cmd());
@@ -125,10 +127,10 @@ public class AutoBrain {
 
         if (shouldShootAfter(lastEP)) {
             paths[paths.length - 1].done().onTrue(Commands.sequence(
-                swerveSubsystem.runToggleAimHub(),       // aim ON
+                swerveSubsystem.runToggleAimHub(true),       // aim ON
                 swerveSubsystem.runStopDrive(),
                 new WaitCommand(0.5),
-                shooterSubsystem.toggleRunIndex()
+                shooterSubsystem.toggleRunIndex(true)
             ));
         }
         else {

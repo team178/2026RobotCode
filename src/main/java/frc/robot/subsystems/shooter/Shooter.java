@@ -185,9 +185,9 @@ public class Shooter extends SubsystemBase {
         });
     }
 
-    public Command toggleRunIndex() {
+    public Command toggleRunIndex(boolean on) {
         return runOnce(() -> {
-            runIndexFlag = !runIndexFlag;
+            runIndexFlag = on;
         });
     }
 
@@ -298,5 +298,10 @@ public class Shooter extends SubsystemBase {
         Logger.processInputs("Shooter/LeftShooter", shooterInputs[2]);
         Logger.processInputs("Shooter/Feeder", shooterInputs[3]);
         Logger.processInputs("Shooter/Indexer", shooterInputs[4]);
+
+        if (DriverStation.isDisabled()) {
+            runShooterFlag = false;
+            runIndexFlag = false;
+        }
     }
 }
