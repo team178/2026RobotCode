@@ -270,8 +270,9 @@ public class Shooter extends SubsystemBase {
                 shooterIOR.stop();
             }
             if (runIndexFlag) {
+                double voltageMult = ((int) (8 * Timer.getFPGATimestamp())) % 8 == 0 ? -1 : 1;
                 feederIO.setVelocityClosedLoop(loggedFeederRadPerSec.get());
-                indexIO.setVelocityClosedLoop(loggedIndexRadPerSec.get());
+                indexIO.setVelocityClosedLoop(voltageMult * loggedIndexRadPerSec.get());
             } else {
                 feederIO.setOpenLoop(0);
                 indexIO.setOpenLoop(0);
