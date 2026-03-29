@@ -286,8 +286,8 @@ public class Constants {
                 "side_left",
                 new Transform3d(
                     new Translation3d(
-                        Units.inchesToMeters(7.5),
-                        Units.inchesToMeters(12.3446),
+                        Units.inchesToMeters(-7.5),
+                        Units.inchesToMeters(-12.3446),
                         Units.inchesToMeters(7.808)
                     ),
                     new Rotation3d(
@@ -302,8 +302,8 @@ public class Constants {
                 "side_right",
                 new Transform3d(
                     new Translation3d(
-                        Units.inchesToMeters(7.5),
-                        Units.inchesToMeters(-12.3446),
+                        Units.inchesToMeters(-7.5),
+                        Units.inchesToMeters(12.3446),
                         Units.inchesToMeters(7.808)
                     ),
                     new Rotation3d(
