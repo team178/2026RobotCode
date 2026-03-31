@@ -33,7 +33,7 @@ public class Shooter extends SubsystemBase {
     private double shooterDistanceAdjust = 0;
     private boolean runShooterFlag = false;
     private boolean reverseFeeder = false;
-    private boolean runIndexFlag = false;
+    public boolean runIndexFlag = false;
     private boolean isAutonomous = true;
 
     private final Supplier<Pose2d> robotPoseSupplier;

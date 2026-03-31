@@ -15,7 +15,7 @@ public class Intake extends SubsystemBase {
 
     private boolean isDeployedFlag = true;
     private boolean isHomingFlag = false;
-    private boolean isRollingFlag = false;
+    public boolean isRollingFlag = false;
     private boolean isDirectionReversed = false;
 
     private boolean isWristMovingUp = false;
