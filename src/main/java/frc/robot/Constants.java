@@ -254,13 +254,13 @@ public class Constants {
                 "shooter_left",
                 new Transform3d(
                     new Translation3d(
-                        Units.inchesToMeters(-11.5),
+                        Units.inchesToMeters(-11.493),
                         Units.inchesToMeters(-7.75),
-                        Units.inchesToMeters(7.75)
+                        Units.inchesToMeters(7.92)
                     ),
                     new Rotation3d(
                         0,
-                        Units.degreesToRadians(-15),
+                        Units.degreesToRadians(-15 - 7.5),
                         Units.degreesToRadians(180)
                     )
                 ),
@@ -283,13 +283,35 @@ public class Constants {
                 1
             ),
             new CameraConfig(
-                "photonvision_climber",
-                new Transform3d(),
+                "side_left",
+                new Transform3d(
+                    new Translation3d(
+                        Units.inchesToMeters(-7.5),
+                        Units.inchesToMeters(-12.3446),
+                        Units.inchesToMeters(7.808)
+                    ),
+                    new Rotation3d(
+                        Units.degreesToRadians(0),
+                        Units.degreesToRadians(-15),
+                        Units.degreesToRadians(-90)
+                    )
+                ),
                 1.0
             ),
             new CameraConfig(
-                "photonvision_shoot_climb",
-                new Transform3d(),
+                "side_right",
+                new Transform3d(
+                    new Translation3d(
+                        Units.inchesToMeters(-7.5),
+                        Units.inchesToMeters(12.3446),
+                        Units.inchesToMeters(7.808)
+                    ),
+                    new Rotation3d(
+                        Units.degreesToRadians(0),
+                        Units.degreesToRadians(-15),
+                        Units.degreesToRadians(90)
+                    )
+                ),
                 1.0
             )
         };

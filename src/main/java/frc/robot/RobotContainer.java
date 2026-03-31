@@ -4,25 +4,14 @@
 
 package frc.robot;
 
-import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
-
-import choreo.auto.AutoFactory;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StringPublisher;
-import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.autos.AutoBrain;
-import frc.robot.subsystems.climb.Climb;
-import frc.robot.subsystems.climb.ClimbIO;
-import frc.robot.subsystems.climb.ClimbIOSpark;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.RollerIO;
 import frc.robot.subsystems.intake.RollerIOSpark;
@@ -51,13 +40,11 @@ public class RobotContainer {
     private final Vision vision;
     private final Shooter shooter;
     private final Intake intake;
-    private final Climb climb;
-
-    private final LoggedNetworkBoolean runAutoBoolean = new LoggedNetworkBoolean("Auto/RunAuto", true);
 
     private final AutoBrain autoBrain;
 
     public RobotContainer() {
+
         Preferences.removeAll();
 
         driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
@@ -75,7 +62,9 @@ public class RobotContainer {
                 vision = new Vision(
                     swerve::addVisionMeasurement,
                     new VisionIOPhoton(VisionConstants.camConfigs[0]),
-                    new VisionIOPhoton(VisionConstants.camConfigs[1])
+                    new VisionIOPhoton(VisionConstants.camConfigs[1]),
+                    new VisionIOPhoton(VisionConstants.camConfigs[2]),
+                    new VisionIOPhoton(VisionConstants.camConfigs[3])
                 );
                 shooter = new Shooter(
                     new ShooterIOTalonFlywheel(ShooterConstants.shooterLMotorCANID),
@@ -88,9 +77,6 @@ public class RobotContainer {
                 intake = new Intake(
                     new RollerIOSpark(),
                     new WristIOSpark()
-                );
-                climb = new Climb(
-                    new ClimbIOSpark()
                 );
                 break;
             case SIM:
@@ -114,14 +100,11 @@ public class RobotContainer {
                     new ShooterIO() {},
                     new ShooterIO() {},
                     new ShooterIO() {},
-                    () -> new Pose2d()
+                    Pose2d::new
                 );
                 intake = new Intake(
                     new RollerIO() {},
                     new WristIO() {}
-                );
-                climb = new Climb(
-                    new ClimbIO() {}
                 );
                 break;
             default:
@@ -145,21 +128,18 @@ public class RobotContainer {
                     new ShooterIO() {},
                     new ShooterIO() {},
                     new ShooterIO() {},
-                    () -> new Pose2d()
+                    Pose2d::new
                 );
                 intake = new Intake(
                     new RollerIO() {},
                     new WristIO() {}
                 );
-                climb = new Climb(
-                    new ClimbIO() {}
-                );
                 break;
         }
+        
+        configureBindings();
 
         autoBrain = new AutoBrain(swerve, shooter, intake);
-
-        configureBindings();
     }
 
     private void configureBindings() {
@@ -169,8 +149,8 @@ public class RobotContainer {
             driverController::getRightX,         // omega
             driverController::getLeftTriggerAxis // raw slow input
         ));
-        driverController.leftBumper().onTrue(swerve.runToggleAimHub());
-        driverController.leftBumper().onFalse(swerve.runToggleAimHub());
+        driverController.leftBumper().onTrue(swerve.runToggleAimHub(true));
+        driverController.leftBumper().onFalse(swerve.runToggleAimHub(false));
         driverController.y().onTrue(swerve.runZeroGyro());
 //        driverController.x().onTrue(swerve.runToggleToXPosition());
 //        driverController.b().onTrue(swerve.runReconfigure());
@@ -179,9 +159,10 @@ public class RobotContainer {
         auxController.povLeft().onTrue(swerve.runOmegaSetTime(0.05));
         auxController.povRight().onTrue(swerve.runOmegaSetTime(-0.05));
 
+        // shooter.setDefaultCommand(shooter.runShooter);
         auxController.y().onTrue(shooter.toggleRunShooter());
-        driverController.rightTrigger(.5).onTrue(shooter.toggleRunIndex());
-        driverController.rightTrigger(.5).onFalse(shooter.toggleRunIndex());
+        driverController.rightTrigger(.5).onTrue(shooter.toggleRunIndex(true));
+        driverController.rightTrigger(.5).onFalse(shooter.toggleRunIndex(false));
 //      auxController.x().onTrue(shooter.incrementShooterDistanceAdjust(true));
 //      auxController.y().onTrue(shooter.incrementShooterDistanceAdjust(false));
 
@@ -197,8 +178,13 @@ public class RobotContainer {
         auxController.a().onFalse(intake.toggleWristNegFlag(false));
 //      auxController.a().onTrue(intake.incrementWristSetpointAdjust(false));
 //      auxController.leftBumper().onTrue(intake.resetPosition());
-        auxController.b().onTrue(intake.toggleRollerDirection());
-        auxController.rightBumper().onTrue(intake.toggleRollerFlag());
+        auxController.b().onTrue(intake.toggleRollerDirection(true));
+        auxController.b().onFalse(intake.toggleRollerDirection(false));
+        auxController.rightBumper().onTrue(intake.toggleRollerFlag(true));
+        auxController.rightBumper().onFalse(intake.toggleRollerFlag(false));
+
+        driverController.povDown().onTrue(shooter.runToggleReverseFeeder(true));
+        driverController.povDown().onFalse(shooter.runToggleReverseFeeder(false));
     }
 
     public void testPeriodic() {

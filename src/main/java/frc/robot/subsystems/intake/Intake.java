@@ -3,6 +3,7 @@ package frc.robot.subsystems.intake;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeConstants;
@@ -26,7 +27,7 @@ public class Intake extends SubsystemBase {
     private final WristIOInputsAutoLogged wristInputs = new WristIOInputsAutoLogged();
 
     LoggedNetworkNumber speed = new LoggedNetworkNumber("Intake/Roller/Speed", IntakeConstants.intakeMaxSpeed);
-    LoggedNetworkNumber voltage = new LoggedNetworkNumber("Intake/Roller/Voltage", 8);
+    LoggedNetworkNumber voltage = new LoggedNetworkNumber("Intake/Roller/Voltage", 10);
     LoggedNetworkNumber position = new LoggedNetworkNumber("Intake/Wrist/Pose", 0);
 
     public Intake(RollerIO rollerIO, WristIO wristIO) {
@@ -121,9 +122,15 @@ public class Intake extends SubsystemBase {
         });
     }
 
-    public Command toggleRollerDirection() {
+    public Command toggleRollerFlag(boolean on) {
         return runOnce(() -> {
-            isDirectionReversed = !isDirectionReversed;
+            isRollingFlag = on;
+        });
+    }
+
+    public Command toggleRollerDirection(boolean on) {
+        return runOnce(() -> {
+            isDirectionReversed = on;
         });
     }
 
@@ -139,14 +146,16 @@ public class Intake extends SubsystemBase {
         if (isWristMovingDown && isWristMovingUp) {
             wristIO.setOpenLoop(0);
         } else if (isWristMovingDown) {
-            wristIO.setOpenLoop(1);
+            wristIO.setOpenLoop(5);
         } else if (isWristMovingUp) {
-            wristIO.setOpenLoop(-1);
+            wristIO.setOpenLoop(-5);
+        } else if(DriverStation.isAutonomous()){
+            wristIO.setOpenLoop(0.5);
         } else {
             wristIO.setOpenLoop(0);
         }
 
-        if (isRollingFlag) {
+        if (isRollingFlag && !isWristMovingDown) {
             // rollerIO.setClosedLoop(isDirectionReversed ? -speed.get() : speed.get());
             rollerIO.setOpenLoop(isDirectionReversed ? -voltage.get() : voltage.get());
         } else {
@@ -171,5 +180,9 @@ public class Intake extends SubsystemBase {
 
         Logger.processInputs("Intake/Wrist", wristInputs);
         Logger.processInputs("Intake/Roller", rollerInputs);
+        
+        if (DriverStation.isDisabled()) {
+            isRollingFlag = false;
+        }
     }
 }

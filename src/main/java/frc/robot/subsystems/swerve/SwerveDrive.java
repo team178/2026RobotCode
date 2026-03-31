@@ -92,9 +92,9 @@ public class SwerveDrive extends SubsystemBase {
 
         aimHubFlag = new AtomicBoolean(false);
 
-        trajVXController = new PIDController(10, 0, 0);
-        trajVYController = new PIDController(10, 0, 0);
-        trajHeadingController = new PIDController(5, 0, 0);
+        trajVXController = new PIDController(8, 0, 0);
+        trajVYController = new PIDController(8, 0, 0);
+        trajHeadingController = new PIDController(3, 0, 0);
         trajHeadingController.enableContinuousInput(0, 2 * Math.PI);
 
         lastMove = Timer.getFPGATimestamp();
@@ -175,7 +175,7 @@ public class SwerveDrive extends SubsystemBase {
 
             adjustSpeedsForPresetRotation(chassisSpeeds);
             submitChassisSpeeds(chassisSpeeds, true, false);
-        });
+        }).withName("Teleop Drive default");
     }
 
     private void adjustSpeedsForPresetRotation(ChassisSpeeds speeds) {
@@ -206,7 +206,10 @@ public class SwerveDrive extends SubsystemBase {
             lastMove = Timer.getFPGATimestamp();
         }
 
-        if (crossbuckOverride || (toCrossbuck && Timer.getFPGATimestamp() - lastMove > SwerveConstants.crossbuckDelaySeconds)) {
+        if (
+            crossbuckOverride && DriverStation.isAutonomous() ||
+            (toCrossbuck && Timer.getFPGATimestamp() - lastMove > SwerveConstants.crossbuckDelaySeconds)
+        ) {
             setModulesToCrossbuckPosition(true);
             return;
         }
@@ -255,7 +258,6 @@ public class SwerveDrive extends SubsystemBase {
     public Command runToggleCrossbuckPosition() {
         return runOnce(() -> {
             toCrossbuck = !toCrossbuck;
-            Logger.recordOutput("Swerve/CrossbuckEnabled", toCrossbuck);
         });
     }
 
@@ -301,9 +303,9 @@ public class SwerveDrive extends SubsystemBase {
         });
     }
 
-    public Command runToggleAimHub() {
+    public Command runToggleAimHub(boolean on) {
         return runOnce(() -> {
-            aimHubFlag.set(!aimHubFlag.get());
+            aimHubFlag.set(on);
         });
     }
 
@@ -410,6 +412,7 @@ public class SwerveDrive extends SubsystemBase {
     @Override
     public void periodic() {
         Logger.recordOutput("Swerve/AimHubFlag", aimHubFlag.get());
+        Logger.recordOutput("Swerve/CrossbuckEnabled", toCrossbuck);
 
         // updated all hardware inputs
         gyroIO.updateInputs(gyroIOInputs);
@@ -448,5 +451,11 @@ public class SwerveDrive extends SubsystemBase {
         poseEstimator.update(rawGyroRotation, updatedModulePositions);
 
         field.setRobotPose(getPose());
+
+        if (DriverStation.isDisabled()) {
+            aimHubFlag.set(false);
+        }
+
+        Logger.recordOutput("Swerve/Drive_Command", this.getCurrentCommand() == null ? "null" : this.getCurrentCommand().getName());
     }
 }

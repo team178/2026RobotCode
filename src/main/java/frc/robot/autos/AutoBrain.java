@@ -9,6 +9,7 @@ import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
@@ -37,8 +38,8 @@ public class AutoBrain {
         var topic = NetworkTableInstance.getDefault()
             .getStringTopic("/SmartDashboard/Auto Path");
         autoPathPublisher = topic.publish();
-        autoPathPublisher.set("1,2,5,6"); // default shown in textbox
-        autoPathSubscriber = topic.subscribe("1,2,5,6");
+        autoPathPublisher.set("1,2,9,4"); // default shown in textbox
+        autoPathSubscriber = topic.subscribe("1,2,9,4");
 
         autoFactory = new AutoFactory(
             swerveSubsystem::getPose,
@@ -67,18 +68,11 @@ public class AutoBrain {
             AutoTrajectory path = auto.trajectory(autoNum + "__1_Preload");
             auto.active().onTrue(Commands.sequence(
                 path.resetOdometry(),
-                shooterSubsystem.toggleRunShooter(),       // start shooter before path
-                path.cmd(),
-                swerveSubsystem.runStopDrive(),            // explicitly stop drive after trajectory
-                swerveSubsystem.setImmediateCrossbuckOverride(true),
-                swerveSubsystem.runToggleAimHub(),         // aim ON
+                path.cmd().withName("preloadPathSequence"),
+                swerveSubsystem.runStopDrive(),
+                swerveSubsystem.runToggleAimHub(true),
                 new WaitCommand(1),                        // aim settling time
-                shooterSubsystem.toggleRunIndex(),         // indexer ON
-                new WaitCommand(6),
-                shooterSubsystem.toggleRunIndex(),         // indexer OFF
-                swerveSubsystem.runToggleAimHub(),         // aim OFF
-                swerveSubsystem.setImmediateCrossbuckOverride(false),
-                shooterSubsystem.toggleRunShooter()        // shooter OFF
+                shooterSubsystem.toggleRunIndex(true)
             ));
             return auto;
         }
@@ -98,7 +92,11 @@ public class AutoBrain {
 
         auto.active().onTrue(Commands.sequence(
             paths[0].resetOdometry(),
-            // shooterSubsystem.toggleRunShooter(),
+            shooterSubsystem.runShooterOn(),
+            intakeSubsystem.toggleWristPosFlag(true),
+            new WaitCommand(1.5),
+            intakeSubsystem.toggleWristPosFlag(false),
+            intakeSubsystem.toggleRollerFlag(true),
             paths[0].cmd()
         ));
 
@@ -106,81 +104,38 @@ public class AutoBrain {
             String EP = points[i + 1];
             String pathN = pathNames[i];
 
-            // Pre-spin shooter at the START of any segment that needs it ready at the end
-            if (shouldSpinShooterDuring(pathN)) {
-                paths[i].active().onTrue(shooterSubsystem.toggleRunShooter());
-            }
-
-            // Run intake rollers at the START of any intake segment
-            if (shouldIntakeDuring(pathN)) {
-                paths[i].active().onTrue(intakeSubsystem.toggleRollerFlag());
-            }
-
             if (shouldShootAfter(EP)) {
                 paths[i].done().onTrue(Commands.sequence(
-                    // Stop intake if it was running during this segment
-                    shouldIntakeDuring(pathN) ? intakeSubsystem.toggleRollerFlag() : Commands.none(),
+                    swerveSubsystem.runToggleAimHub(true),       // aim ON
                     swerveSubsystem.runStopDrive(),
-                    swerveSubsystem.setImmediateCrossbuckOverride(true),
-                    swerveSubsystem.runToggleAimHub(),               // aim ON
-                    // Only toggle shooter ON here if it was NOT already pre-spun during travel
-                    shouldSpinShooterDuring(pathN) ? Commands.none() : shooterSubsystem.toggleRunShooter(),
-                    new WaitCommand(1),                              // aim settling time
-                    shooterSubsystem.toggleRunIndex(),               // indexer ON
+                    new WaitCommand(0.5),
+                    shooterSubsystem.toggleRunIndex(true),
                     new WaitCommand(6),
-                    shooterSubsystem.toggleRunIndex(),               // indexer OFF
-                    shooterSubsystem.toggleRunShooter(),             // shooter OFF
-                    swerveSubsystem.runToggleAimHub(),               // aim OFF
-                    swerveSubsystem.setImmediateCrossbuckOverride(false),
-                    paths[i + 1].cmd()
+                    shooterSubsystem.toggleRunIndex(false),
+                    swerveSubsystem.runToggleAimHub(false),
+                    paths[i + 1].cmd().withName("EP_PathSequence"),
+                    new PrintCommand("done with point")
                 ));
-            } else if (shouldIntakeDuring(pathN)) {
-                paths[i].done().onTrue(Commands.sequence(
-                    intakeSubsystem.toggleRollerFlag(),
-                    paths[i + 1].cmd()
-                ));
-            } else {
-                paths[i].done().onTrue(paths[i + 1].cmd());
+            } 
+            if (shouldIntakeDuring(pathN)) {
+                paths[i].done().onTrue(intakeSubsystem.toggleRollerFlag(false));
             }
+            paths[i].done().onTrue(paths[i + 1].cmd());
         }
 
         String lastEP = points[points.length - 1];
         AutoTrajectory lastPath = paths[paths.length - 1];
         String lastPathName = pathNames[pathNames.length - 1];
 
-        // Pre-spin shooter at the START of the last segment if needed
-        if (shouldSpinShooterDuring(lastPathName)) {
-            lastPath.active().onTrue(shooterSubsystem.toggleRunShooter());
-        }
-
-        // Run intake rollers at the START of the last segment if needed
-        if (shouldIntakeDuring(lastPathName)) {
-            lastPath.active().onTrue(intakeSubsystem.toggleRollerFlag());
-        }
-
         if (shouldShootAfter(lastEP)) {
             paths[paths.length - 1].done().onTrue(Commands.sequence(
-                // Stop intake if it was running during this last segment
-                shouldIntakeDuring(lastPathName) ? intakeSubsystem.toggleRollerFlag() : Commands.none(),
+                swerveSubsystem.runToggleAimHub(true),       // aim ON
                 swerveSubsystem.runStopDrive(),
-                swerveSubsystem.setImmediateCrossbuckOverride(true),
-                swerveSubsystem.runToggleAimHub(),                   // aim ON
-                // Only toggle shooter ON here if it was NOT already pre-spun during travel
-                shouldSpinShooterDuring(lastPathName) ? Commands.none() : shooterSubsystem.toggleRunShooter(),
-                new WaitCommand(1),                                  // aim settling time
-                shooterSubsystem.toggleRunIndex(),                   // indexer ON
-                new WaitCommand(6),
-                shooterSubsystem.toggleRunIndex(),                   // indexer OFF
-                shooterSubsystem.toggleRunShooter(),                 // shooter OFF
-                swerveSubsystem.runToggleAimHub(),                   // aim OFF
-                swerveSubsystem.setImmediateCrossbuckOverride(false)
+                new WaitCommand(0.5),
+                shooterSubsystem.toggleRunIndex(true)
             ));
-        } else if (shouldIntakeDuring(lastPathName)) {
-            lastPath.done().onTrue(Commands.sequence(
-                intakeSubsystem.toggleRollerFlag(),
-                swerveSubsystem.runStopDrive()
-            ));
-        } else {
+        }
+        else {
             lastPath.done().onTrue(swerveSubsystem.runStopDrive());
         }
 
@@ -207,6 +162,7 @@ public class AutoBrain {
         return path.equals("Auto2__2_5") || path.equals("Auto2__5_6a") || path.equals("Auto2__2_3") ||
             path.equals("Auto3__5_6") || path.equals("Auto1__2_3") || path.equals("Auto2__2_4a") ||
             path.equals("Auto2__5_2") || path.equals("Auto1__2_5") || path.equals("Auto3__5_2") ||
-            path.equals("Auto1__2_4") || path.equals("Auto1__4_11");
+            path.equals("Auto1__2_4") || path.equals("Auto1__4_11") || path.equals("Auto1__2_9") || 
+            path.equals("Auto3__5_10") || path.equals("Auto1__1_3") || path.equals("Auto1__5_2");
     }
 }
