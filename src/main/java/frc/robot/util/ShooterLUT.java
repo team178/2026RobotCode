@@ -5,7 +5,7 @@ import edu.wpi.first.math.util.Units;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class HubShootLUT {
+public class ShooterLUT {
     private static final TreeMap<Double, Double> flywheelSpeedTable = new TreeMap<>();
 
     private final static double robotOffsetDistance = Units.inchesToMeters(25.0) / 2;
