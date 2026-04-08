@@ -12,6 +12,7 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.autos.AutoBrain;
+import frc.robot.subsystems.AutoCreator;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.RollerIO;
 import frc.robot.subsystems.intake.RollerIOSpark;
@@ -40,6 +41,7 @@ public class RobotContainer {
     private final Vision vision;
     private final Shooter shooter;
     private final Intake intake;
+    private final AutoCreator autoCreator;
 
     private final AutoBrain autoBrain;
 
@@ -140,6 +142,7 @@ public class RobotContainer {
         configureBindings();
 
         autoBrain = new AutoBrain(swerve, shooter, intake);
+        autoCreator = new AutoCreator(swerve, shooter, intake);
     }
 
     private void configureBindings() {
@@ -192,6 +195,6 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return autoBrain.buildAuto().cmd();
+        return autoCreator.returnAuto();
     }
 }
