@@ -71,7 +71,7 @@ public class AutoBrain {
                 path.cmd().withName("preloadPathSequence"),
                 swerveSubsystem.runStopDrive(),
                 swerveSubsystem.runToggleAimHub(true),
-                new WaitCommand(1),                        // aim settling time
+                new WaitCommand(0.5),                        // aim settling time
                 shooterSubsystem.toggleRunIndex(true)
             ));
             return auto;
@@ -92,12 +92,16 @@ public class AutoBrain {
 
         auto.active().onTrue(Commands.sequence(
             paths[0].resetOdometry(),
-            shooterSubsystem.runShooterOn(),
-            intakeSubsystem.toggleWristPosFlag(true),
-            new WaitCommand(1.5),
-            intakeSubsystem.toggleWristPosFlag(false),
-            intakeSubsystem.toggleRollerFlag(true),
-            paths[0].cmd()
+            Commands.parallel(
+                shooterSubsystem.toggleRunShooter(),
+                Commands.sequence(
+                    intakeSubsystem.toggleWristPosFlag(true),
+                    intakeSubsystem.toggleRollerFlag(true),
+                    new WaitCommand(0.5),
+                    intakeSubsystem.toggleWristPosFlag(false)
+                ),
+                paths[0].cmd()
+            )
         ));
 
         for (int i = 0; i < paths.length - 1; i++) {
@@ -111,16 +115,29 @@ public class AutoBrain {
                     new WaitCommand(0.5),
                     shooterSubsystem.toggleRunIndex(true),
                     new WaitCommand(6),
+                    // intakeSubsystem.toggleWristNegFlag(true),
+                    // new WaitCommand(3),
+                    // intakeSubsystem.toggleWristPosFlag(true),
+                    // new WaitCommand(0.5),
                     shooterSubsystem.toggleRunIndex(false),
                     swerveSubsystem.runToggleAimHub(false),
                     paths[i + 1].cmd().withName("EP_PathSequence"),
-                    new PrintCommand("done with point")
+                    new PrintCommand("DONE SHOOTING"),
+                    paths[i + 1].cmd()
                 ));
             } 
-            if (shouldIntakeDuring(pathN)) {
-                paths[i].done().onTrue(intakeSubsystem.toggleRollerFlag(false));
+            else if (shouldIntakeDuring(pathN)) {
+                paths[i].active().onTrue(
+                    intakeSubsystem.isRollingFlag == true ? Commands.none() : intakeSubsystem.toggleRollerFlag(true)
+                );
+                paths[i].done().onTrue(Commands.sequence(
+                    intakeSubsystem.toggleRollerFlag(false),
+                    paths[i + 1].cmd()
+                ));
             }
-            paths[i].done().onTrue(paths[i + 1].cmd());
+            else {
+                paths[i].done().onTrue(paths[i + 1].cmd());
+            }
         }
 
         String lastEP = points[points.length - 1];
@@ -163,6 +180,7 @@ public class AutoBrain {
             path.equals("Auto3__5_6") || path.equals("Auto1__2_3") || path.equals("Auto2__2_4a") ||
             path.equals("Auto2__5_2") || path.equals("Auto1__2_5") || path.equals("Auto3__5_2") ||
             path.equals("Auto1__2_4") || path.equals("Auto1__4_11") || path.equals("Auto1__2_9") || 
-            path.equals("Auto3__5_10") || path.equals("Auto1__1_3") || path.equals("Auto1__5_2");
+            path.equals("Auto3__5_10") || path.equals("Auto1__1_3") || path.equals("Auto1__5_2") || 
+            path.equals("Auto1__4_3");
     }
 }
