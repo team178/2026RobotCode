@@ -25,6 +25,8 @@ public class AutoBrain {
     private final Shooter shooterSubsystem;
     private final Intake intakeSubsystem;
 
+    private AutoRoutine auto;
+
     public AutoBrain(SwerveDrive swerveSubsystem, Shooter shooterSubsystem, Intake intakeSubsystem) {
         this.swerveSubsystem = swerveSubsystem;
         this.shooterSubsystem = shooterSubsystem;
@@ -48,6 +50,8 @@ public class AutoBrain {
             true,
             swerveSubsystem
         );
+
+        auto = autoFactory.newRoutine("auto");
     }
 
     public AutoRoutine buildAuto() {
@@ -55,8 +59,6 @@ public class AutoBrain {
         String pathName = autoPathSubscriber.get().trim();
 
         String[] points = pathName.split(",");
-
-        AutoRoutine auto = autoFactory.newRoutine("auto");
 
         // Trigger preload branch if path is empty OR only one waypoint provided
         if (pathName.isEmpty() || points.length < 2) {
