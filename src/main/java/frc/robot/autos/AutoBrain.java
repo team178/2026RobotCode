@@ -181,6 +181,6 @@ public class AutoBrain {
             path.equals("Auto2__5_2") || path.equals("Auto1__2_5") || path.equals("Auto3__5_2") ||
             path.equals("Auto1__2_4") || path.equals("Auto1__4_11") || path.equals("Auto1__2_9") || 
             path.equals("Auto3__5_10") || path.equals("Auto1__1_3") || path.equals("Auto1__5_2") || 
-            path.equals("Auto1__4_3");
+            path.equals("Auto1__4_3") || path.equals("Auto1__4_13");
     }
 }
