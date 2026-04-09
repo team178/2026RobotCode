@@ -143,48 +143,51 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
+        // swerve default joystick inputs
         swerve.setDefaultCommand(swerve.runDriveInputs(
             driverController::getLeftX,          // vx
             driverController::getLeftY,          // vy
             driverController::getRightX,         // omega
             driverController::getLeftTriggerAxis // raw slow input
         ));
+
+        // reset robot orientation (doesn't work with vision or FMS)
+        driverController.y().onTrue(swerve.runZeroGyro());
+
+        // hub aim on/off
         driverController.leftBumper().onTrue(swerve.runToggleAimHub(true));
         driverController.leftBumper().onFalse(swerve.runToggleAimHub(false));
-        driverController.y().onTrue(swerve.runZeroGyro());
-//        driverController.x().onTrue(swerve.runToggleToXPosition());
-//        driverController.b().onTrue(swerve.runReconfigure());
+
+        // swerve adjustments using POV
         auxController.povUp().onTrue(swerve.runXSetTime(-0.15));
         auxController.povDown().onTrue(swerve.runXSetTime(0.15));
         auxController.povLeft().onTrue(swerve.runOmegaSetTime(0.05));
         auxController.povRight().onTrue(swerve.runOmegaSetTime(-0.05));
 
-        // shooter.setDefaultCommand(shooter.runShooter);
+        // shooter flywheel on/off
         auxController.y().onTrue(shooter.toggleRunShooter());
+
+        // index feed on/off
         driverController.rightTrigger(.5).onTrue(shooter.toggleRunIndex(true));
         driverController.rightTrigger(.5).onFalse(shooter.toggleRunIndex(false));
-//      auxController.x().onTrue(shooter.incrementShooterDistanceAdjust(true));
-//      auxController.y().onTrue(shooter.incrementShooterDistanceAdjust(false));
 
-        // intake.setDefaultCommand(intake.runStopRollers());
-//      auxController.rightBumper().toggleOnFalse(intake.runRollers());
-//      auxController.leftTrigger().onTrue(intake.toggleWristPose());
-//      auxController.x().onTrue(intake.moveWristWithVoltage(-1));
-//      auxController.a().onTrue(intake.moveWristWithVoltage(1));
-        auxController.x().onTrue(intake.toggleWristPosFlag(true));
-        auxController.x().onFalse(intake.toggleWristPosFlag(false));
-
-        auxController.a().onTrue(intake.toggleWristNegFlag(true));
-        auxController.a().onFalse(intake.toggleWristNegFlag(false));
-//      auxController.a().onTrue(intake.incrementWristSetpointAdjust(false));
-//      auxController.leftBumper().onTrue(intake.resetPosition());
-        auxController.b().onTrue(intake.toggleRollerDirection(true));
-        auxController.b().onFalse(intake.toggleRollerDirection(false));
-        auxController.rightBumper().onTrue(intake.toggleRollerFlag(true));
-        auxController.rightBumper().onFalse(intake.toggleRollerFlag(false));
-
+        // agitator feed/unjam
         driverController.povDown().onTrue(shooter.runToggleReverseFeeder(true));
         driverController.povDown().onFalse(shooter.runToggleReverseFeeder(false));
+
+        // intake wrist up/down
+        auxController.x().onTrue(intake.toggleWristPosFlag(true));
+        auxController.x().onFalse(intake.toggleWristPosFlag(false));
+        auxController.a().onTrue(intake.toggleWristNegFlag(true));
+        auxController.a().onFalse(intake.toggleWristNegFlag(false));
+
+        // intake rollers suck/repel
+        auxController.b().onTrue(intake.toggleRollerDirection(true));
+        auxController.b().onFalse(intake.toggleRollerDirection(false));
+
+        // intake rollers on/off
+        auxController.rightBumper().onTrue(intake.toggleRollerFlag(true));
+        auxController.rightBumper().onFalse(intake.toggleRollerFlag(false));
     }
 
     public void testPeriodic() {
