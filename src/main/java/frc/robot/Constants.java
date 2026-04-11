@@ -416,7 +416,7 @@ public class Constants {
         
         public static final AngularVelocity shooterRunSpeed = RadiansPerSecond.of(340);
         public static final AngularVelocity feederRunSpeed = RadiansPerSecond.of(5000);
-        public static final AngularVelocity indexRunSpeed = RadiansPerSecond.of(5000);
+        public static final AngularVelocity indexRunSpeed = RadiansPerSecond.of(7250);
 
         public static final LoggedTunableControlConstants flywheelConstants =
             new LoggedTunableControlConstants("Shooter/Flywheel")
