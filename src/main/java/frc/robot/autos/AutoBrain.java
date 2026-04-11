@@ -132,7 +132,7 @@ public class AutoBrain {
                     swerveSubsystem.runStopDrive(),
                     new WaitCommand(0.5),
                     shooterSubsystem.toggleRunIndex(true),
-                    new WaitCommand(6),
+                    new WaitCommand(4),
                     // intakeSubsystem.toggleWristNegFlag(true),
                     // new WaitCommand(3),
                     // intakeSubsystem.toggleWristPosFlag(true),
