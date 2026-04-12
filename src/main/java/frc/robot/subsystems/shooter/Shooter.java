@@ -39,7 +39,7 @@ public class Shooter extends SubsystemBase {
     private boolean runShooterFlag = true;
     private boolean reverseFeeder = false;
     public boolean runIndexFlag = false;
-    private boolean isAutonomous = true;
+    private boolean maxShooterFlag = false;
 
     private final Supplier<Pose2d> robotPoseSupplier;
 
@@ -242,6 +242,12 @@ public class Shooter extends SubsystemBase {
         });
     }
 
+    public Command switchMaxShooterFlag(boolean on) {
+        return runOnce(() -> {
+            maxShooterFlag = on;
+        });
+    }
+
     @Override
     public void periodic() {
         // if (RobotState.isDisabled()) {
@@ -262,27 +268,31 @@ public class Shooter extends SubsystemBase {
 
         // Logger.recordOutput("Shooter/OrchestraPlaying", orchestra.isPlaying());
         // Logger.recordOutput("Shooter/DisabledTimer", (int) disabledTimer.get());
-
+        
         if (runShooterFlag) {
             // shooterIOL.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
             // shooterIOM.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
             // shooterIOR.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
+            if(maxShooterFlag) {
+                shootWithDistance(Meters.of(178));
+            } else {
+                Pose2d robotPose = robotPoseSupplier.get();
+                Pose2d hubPose = FieldConstants.getHubCenter();
 
-            Pose2d robotPose = robotPoseSupplier.get();
-            Pose2d hubPose = FieldConstants.getHubCenter();
+                Distance hubDistance = Meters.of(robotPose.getTranslation().getDistance(hubPose.getTranslation()));
 
-            Distance hubDistance = Meters.of(robotPose.getTranslation().getDistance(hubPose.getTranslation()));
-
-            shootWithDistance(hubDistance);
+                shootWithDistance(hubDistance);
+            }
         } else {
             shooterIOL.stop();
             shooterIOM.stop();
             shooterIOR.stop();
         }
         if (runIndexFlag) {
-            double voltageMult =
-                (((int) (8 * Timer.getFPGATimestamp())) % 8 == 0)
-                ? 1 : 1;
+            double voltageMult = 1
+                // (((int) (8 * Timer.getFPGATimestamp())) % 8 == 0)
+                // ? 1 : 1
+                ;
             feederIO.setVelocityClosedLoop(RadiansPerSecond.of(reverseFeeder ? -loggedFeederRadPerSec.get() : loggedFeederRadPerSec.get()));
             indexIO.setVelocityClosedLoop(RadiansPerSecond.of(reverseFeeder ? 0 : voltageMult * loggedIndexRadPerSec.get()));
         } else {

@@ -25,6 +25,12 @@ public class Intake extends SubsystemBase {
     private boolean isWristMovingUp = false;
     private boolean isWristMovingDown = false;
     private boolean isAutoPulsing = false;
+    private int intakePulses = 0;
+    private boolean pulsingUp = false;
+    private boolean pulsingDown = false;
+    private double pulseTimer = 0;
+    private boolean upPressed = false;
+    private boolean downPressed = false;
 
     private Angle pivotSetpointAdjust = Radians.mutable(0.0);
 
@@ -111,13 +117,21 @@ public class Intake extends SubsystemBase {
 
     public Command toggleWristPosFlag(boolean p_on) {
         return runOnce(() -> {
+            intakePulses = 0;
+            pulsingDown = false;
+            pulsingUp = false;
             isWristMovingDown = p_on;
+            downPressed = p_on;
         });
     }
 
     public Command toggleWristNegFlag(boolean p_on) {
         return runOnce(() -> {
+            intakePulses = 0;
+            pulsingDown = false;
+            pulsingUp = false;
             isWristMovingUp = p_on;
+            upPressed = p_on;
         });
     }
 
@@ -139,6 +153,13 @@ public class Intake extends SubsystemBase {
         });
     }
 
+    public Command addPulse() {
+        return runOnce(() -> {
+            if(!upPressed && !downPressed) intakePulses++;
+            else intakePulses = 0;
+        });
+    }
+
     @Override
     public void periodic() {
 //        if (!isHomingFlag) {
@@ -148,6 +169,39 @@ public class Intake extends SubsystemBase {
 //                setPose(IntakeWristPose.STOWED);
 //            }
 //        }
+
+        
+        //check if any pulses are in queue
+        if(intakePulses > 0) {
+            double time = Timer.getFPGATimestamp();
+            //check if the pulse has been initiated, if not, it starts up motion
+            if(!pulsingUp && !pulsingDown) {
+                pulseTimer = time;
+                pulsingUp = true;
+                pulsingDown = false;
+                isWristMovingUp = true;
+                isWristMovingDown = false;
+            } else if(pulsingUp) {
+                // if moving up, checks time, if done, it starts down motion
+                if(time - pulseTimer > 0.4) {
+                    pulseTimer = time;
+                    pulsingUp = false;
+                    pulsingDown = true;
+                    isWristMovingUp = false;
+                    isWristMovingDown = true;
+                }
+            } else if (pulsingDown) {
+                //if moving down, checks time, if done, it terminates pulse
+                if(time - pulseTimer > 0.4) {
+                    pulseTimer = 0;
+                    pulsingUp = false;
+                    pulsingDown = false;
+                    isWristMovingUp = false;
+                    isWristMovingDown = false;
+                    intakePulses--;
+                }
+            }
+        }
         if (isWristMovingDown && isWristMovingUp) {
             wristIO.setOpenLoop(Volts.zero());
         } else if (isWristMovingDown) {
@@ -167,18 +221,7 @@ public class Intake extends SubsystemBase {
             rollerIO.setOpenLoop(Volts.zero());
         }
 
-        if(DriverStation.isAutonomous() && isAutoPulsing) {
-            double time = Timer.getFPGATimestamp();
-            double upTime = 0.5;
-            double downTime = 0.5;
-            time/= (upTime + downTime);
-            upTime/= (upTime + downTime);
-            if(time - Math.floor(time) < upTime) {
-                wristIO.setOpenLoop(Volts.of(-5));
-            } else {
-                wristIO.setOpenLoop(Volts.of(5));
-            }
-        }
+
 
         Logger.recordOutput("Intake/Wrist/Deployed", isDeployedFlag);
         Logger.recordOutput("Intake/Wrist/Homing", isHomingFlag);

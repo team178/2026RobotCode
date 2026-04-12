@@ -159,13 +159,12 @@ public class RobotContainer {
         driverController.leftBumper().onFalse(swerve.runToggleAimHub(false));
 
         // swerve adjustments using POV
-        auxController.povUp().onTrue(swerve.runXSetTime(-0.15));
-        auxController.povDown().onTrue(swerve.runXSetTime(0.15));
-        auxController.povLeft().onTrue(swerve.runOmegaSetTime(0.05));
-        auxController.povRight().onTrue(swerve.runOmegaSetTime(-0.05));
+        // auxController.povUp().onTrue(swerve.runXSetTime(-0.15));
+        // auxController.povDown().onTrue(swerve.runXSetTime(0.15));
+        // auxController.povLeft().onTrue(swerve.runOmegaSetTime(0.05));
+        // auxController.povRight().onTrue(swerve.runOmegaSetTime(-0.05));
 
         // shooter flywheel on/off
-        auxController.y().onTrue(shooter.toggleRunShooter());
 
         // index feed on/off
         driverController.rightTrigger(.5).onTrue(shooter.toggleRunIndex(true));
@@ -181,13 +180,23 @@ public class RobotContainer {
         auxController.a().onTrue(intake.toggleWristNegFlag(true));
         auxController.a().onFalse(intake.toggleWristNegFlag(false));
 
+        // intake wrist pulses
+        auxController.leftTrigger().onTrue(intake.addPulse());
+
         // intake rollers suck/repel
         auxController.b().onTrue(intake.toggleRollerDirection(true));
         auxController.b().onFalse(intake.toggleRollerDirection(false));
 
         // intake rollers on/off
-        auxController.rightBumper().onTrue(intake.toggleRollerFlag(true));
-        auxController.rightBumper().onFalse(intake.toggleRollerFlag(false));
+        auxController.rightBumper().onTrue(intake.toggleRollerFlag(false));
+        auxController.rightBumper().onFalse(intake.toggleRollerFlag(true));
+
+        // shooter toggles on/off
+        auxController.leftBumper().onTrue(shooter.toggleRunShooter());
+
+        // shooter goes to max speed
+        auxController.y().onTrue(shooter.switchMaxShooterFlag(true));
+        auxController.y().onFalse(shooter.switchMaxShooterFlag(false));
     }
 
     public void testPeriodic() {
