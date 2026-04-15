@@ -19,7 +19,7 @@ public class Intake extends SubsystemBase {
 
     private boolean isDeployedFlag = true;
     private boolean isHomingFlag = false;
-    public boolean isRollingFlag = false;
+    public boolean isRollingFlag = true;
     private boolean isDirectionReversed = false;
 
     private boolean isWristMovingUp = false;
@@ -243,7 +243,8 @@ public class Intake extends SubsystemBase {
         Logger.processInputs("Intake/Roller", rollerInputs);
         
         if (DriverStation.isDisabled()) {
-            isRollingFlag = false;
+            isRollingFlag = true;
         }
     }
 }
+
