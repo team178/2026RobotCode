@@ -162,6 +162,7 @@ public class Intake extends SubsystemBase {
 
     @Override
     public void periodic() {
+        if (DriverStation.isAutonomous()) toggleRollerFlag(true);
 //        if (!isHomingFlag) {
 //            if (isDeployedFlag) {
 //                setPose(IntakeWristPose.DEPLOYED);

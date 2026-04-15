@@ -132,11 +132,13 @@ public class AutoBrain {
                     swerveSubsystem.runStopDrive(),
                     new WaitCommand(0.5),
                     shooterSubsystem.toggleRunIndex(true),
-                    new WaitCommand(4),
-                    // intakeSubsystem.toggleWristNegFlag(true),
-                    // new WaitCommand(3),
-                    // intakeSubsystem.toggleWristPosFlag(true),
-                    // new WaitCommand(0.5),
+                    new WaitCommand(3),
+                    intakeSubsystem.toggleWristNegFlag(true),
+                    new WaitCommand(0.4),
+                    intakeSubsystem.toggleWristNegFlag(false),
+                    intakeSubsystem.toggleWristPosFlag(true),
+                    new WaitCommand(0.6),
+                    intakeSubsystem.toggleWristPosFlag(false),
                     shooterSubsystem.toggleRunIndex(false),
                     swerveSubsystem.runToggleAimHub(false),
                     paths[i + 1].cmd().withName("EP_PathSequence"),
@@ -166,8 +168,14 @@ public class AutoBrain {
             paths[paths.length - 1].done().onTrue(Commands.sequence(
                 swerveSubsystem.runToggleAimHub(true),       // aim ON
                 swerveSubsystem.runStopDrive(),
-                new WaitCommand(0.5),
-                shooterSubsystem.toggleRunIndex(true)
+                new WaitCommand(0.1),
+                shooterSubsystem.toggleRunIndex(true),
+                new WaitCommand(3),
+                intakeSubsystem.toggleWristNegFlag(true),
+                new WaitCommand(0.4),
+                intakeSubsystem.toggleWristNegFlag(false),
+                intakeSubsystem.toggleWristPosFlag(true),
+                new WaitCommand(0.6)
             ));
         }
         else {
