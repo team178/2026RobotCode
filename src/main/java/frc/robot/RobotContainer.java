@@ -175,10 +175,10 @@ public class RobotContainer {
         driverController.povDown().onFalse(shooter.runToggleReverseFeeder(false));
 
         // intake wrist up/down
-        auxController.x().onTrue(intake.toggleWristPosFlag(true));
-        auxController.x().onFalse(intake.toggleWristPosFlag(false));
-        auxController.a().onTrue(intake.toggleWristNegFlag(true));
-        auxController.a().onFalse(intake.toggleWristNegFlag(false));
+        auxController.a().onTrue(intake.toggleWristPosFlag(true));
+        auxController.a().onFalse(intake.toggleWristPosFlag(false));
+        auxController.x().onTrue(intake.toggleWristNegFlag(true));
+        auxController.x().onFalse(intake.toggleWristNegFlag(false));
 
         // intake wrist pulses
         auxController.leftTrigger().onTrue(intake.addPulse());
