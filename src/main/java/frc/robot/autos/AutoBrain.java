@@ -150,10 +150,7 @@ public class AutoBrain {
                 paths[i].active().onTrue(
                     intakeSubsystem.isRollingFlag == true ? Commands.none() : intakeSubsystem.toggleRollerFlag(true)
                 );
-                paths[i].done().onTrue(Commands.sequence(
-                    intakeSubsystem.toggleRollerFlag(false),
-                    paths[i + 1].cmd()
-                ));
+                paths[i].done().onTrue(paths[i + 1].cmd());
             }
             else {
                 paths[i].done().onTrue(paths[i + 1].cmd());
