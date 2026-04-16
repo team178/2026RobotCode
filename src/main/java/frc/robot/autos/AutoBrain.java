@@ -51,6 +51,7 @@ public class AutoBrain {
              * a command because of ConcurrentModificationExceptions
              */
             new Thread(() -> {
+                this.cachedAuto = null;
                 this.cachedAuto = buildAuto();
                 System.out.println("Tried to build auto!");
                 updateBuiltBoolean();
@@ -141,8 +142,6 @@ public class AutoBrain {
                     intakeSubsystem.toggleWristPosFlag(false),
                     shooterSubsystem.toggleRunIndex(false),
                     swerveSubsystem.runToggleAimHub(false),
-                    paths[i + 1].cmd().withName("EP_PathSequence"),
-                    new PrintCommand("DONE SHOOTING"),
                     paths[i + 1].cmd()
                 ));
             } 
@@ -165,7 +164,7 @@ public class AutoBrain {
             paths[paths.length - 1].done().onTrue(Commands.sequence(
                 swerveSubsystem.runToggleAimHub(true),       // aim ON
                 swerveSubsystem.runStopDrive(),
-                new WaitCommand(0.1),
+                new WaitCommand(1),
                 shooterSubsystem.toggleRunIndex(true),
                 new WaitCommand(3),
                 intakeSubsystem.toggleWristNegFlag(true),
