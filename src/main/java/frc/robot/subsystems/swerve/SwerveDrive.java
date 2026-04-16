@@ -186,6 +186,10 @@ public class SwerveDrive extends SubsystemBase {
             Translation2d robotToHub = hubPose.getTranslation().minus(robotPose.getTranslation());
             Rotation2d targetHeading = robotToHub.getAngle().minus(Rotation2d.k180deg);
 
+            Logger.recordOutput("Swerve/TargetHeading", targetHeading);
+            Logger.recordOutput("Field/HubPose", hubPose);
+            Logger.recordOutput("Swerve/AutoAlignUpdate", Timer.getFPGATimestamp());
+
             speeds.omegaRadiansPerSecond = trajHeadingController.calculate(
                 robotPose.getRotation().getRadians(),
                 targetHeading.getRadians()
@@ -309,6 +313,14 @@ public class SwerveDrive extends SubsystemBase {
         });
     }
 
+    public Command runOnlyAimHubBoomBoomBoomWowCommand() {
+        return run(() -> {
+            var cs = new ChassisSpeeds();
+            adjustSpeedsForPresetRotation(cs);
+            submitChassisSpeeds(cs, false, false);
+        });
+    }
+
     @AutoLogOutput(key = "Odometry/Pose")
     public Pose2d getPose() {
         return poseEstimator.getEstimatedPosition();
@@ -377,6 +389,7 @@ public class SwerveDrive extends SubsystemBase {
         // NOTE: We call runChassisSpeeds() directly so that the existing
         // ChassisSpeeds.fromFieldRelativeSpeeds() and discretize() logic applies,
         // matching exactly how teleop driving works.
+        adjustSpeedsForPresetRotation(speeds);
         submitChassisSpeeds(speeds, true, true);
     }
 

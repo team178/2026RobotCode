@@ -129,19 +129,25 @@ public class AutoBrain {
 
             if (shouldShootAfter(EP)) {
                 paths[i].done().onTrue(Commands.sequence(
-                    swerveSubsystem.runToggleAimHub(true),       // aim ON
-                    swerveSubsystem.runStopDrive(),
-                    new WaitCommand(0.5),
-                    shooterSubsystem.toggleRunIndex(true),
-                    new WaitCommand(3),
-                    intakeSubsystem.toggleWristNegFlag(true),
-                    new WaitCommand(0.4),
-                    intakeSubsystem.toggleWristNegFlag(false),
-                    intakeSubsystem.toggleWristPosFlag(true),
-                    new WaitCommand(0.6),
-                    intakeSubsystem.toggleWristPosFlag(false),
-                    shooterSubsystem.toggleRunIndex(false),
+                    Commands.sequence(
+                        new WaitCommand(1),
+                        shooterSubsystem.toggleRunIndex(true),
+                        new WaitCommand(1),
+                        intakeSubsystem.toggleWristNegFlag(true),
+                        new WaitCommand(0.4),
+                        intakeSubsystem.toggleWristNegFlag(false),
+                        intakeSubsystem.toggleWristPosFlag(true),
+                        new WaitCommand(0.6),
+                        intakeSubsystem.toggleWristPosFlag(false),
+                        new WaitCommand(1),
+                        shooterSubsystem.toggleRunIndex(false)
+                    ).deadlineFor(Commands.sequence(
+                        swerveSubsystem.runToggleAimHub(true),
+                        swerveSubsystem.runOnlyAimHubBoomBoomBoomWowCommand()
+                    )),
+
                     swerveSubsystem.runToggleAimHub(false),
+                
                     paths[i + 1].cmd()
                 ));
             } 
@@ -162,16 +168,21 @@ public class AutoBrain {
 
         if (shouldShootAfter(lastEP)) {
             paths[paths.length - 1].done().onTrue(Commands.sequence(
-                swerveSubsystem.runToggleAimHub(true),       // aim ON
-                swerveSubsystem.runStopDrive(),
-                new WaitCommand(1),
-                shooterSubsystem.toggleRunIndex(true),
-                new WaitCommand(3),
-                intakeSubsystem.toggleWristNegFlag(true),
-                new WaitCommand(0.4),
-                intakeSubsystem.toggleWristNegFlag(false),
-                intakeSubsystem.toggleWristPosFlag(true),
-                new WaitCommand(0.6)
+                Commands.sequence(
+                    new WaitCommand(1),
+                    shooterSubsystem.toggleRunIndex(true),
+                    new WaitCommand(3),
+                    intakeSubsystem.toggleWristNegFlag(true),
+                    new WaitCommand(0.4),
+                    intakeSubsystem.toggleWristNegFlag(false),
+                    intakeSubsystem.toggleWristPosFlag(true),
+                    new WaitCommand(0.6)
+                ).deadlineFor(Commands.sequence(
+                    swerveSubsystem.runToggleAimHub(true),
+                    swerveSubsystem.runOnlyAimHubBoomBoomBoomWowCommand()
+                )),
+
+                swerveSubsystem.runToggleAimHub(false)
             ));
         }
         else {
