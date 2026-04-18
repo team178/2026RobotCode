@@ -28,6 +28,7 @@ public class AutoBrain {
     private final Intake intakeSubsystem;
 
     private AutoRoutine cachedAuto;
+    private String autoThatIsCached;
 
     public AutoBrain(SwerveDrive swerveSubsystem, Shooter shooterSubsystem, Intake intakeSubsystem) {
         this.swerveSubsystem = swerveSubsystem;
@@ -52,7 +53,7 @@ public class AutoBrain {
              */
             new Thread(() -> {
                 this.cachedAuto = null;
-                this.cachedAuto = buildAuto();
+                buildAuto();
                 System.out.println("Tried to build auto!");
                 updateBuiltBoolean();
             }).start();
@@ -69,7 +70,7 @@ public class AutoBrain {
         );
     }
 
-    public AutoRoutine buildAuto() {
+    public void buildAuto() {
         String autoNum = autoMode.getSelected();
         String pathName = autoPathSubscriber.get().trim();
 
@@ -81,7 +82,8 @@ public class AutoBrain {
         if (pathName.isEmpty() || points.length < 2) {
             if (!pathName.isEmpty() && points.length < 2) {
                 System.out.println("Not enough points");
-                return auto;
+                cachedAuto = null;
+                autoThatIsCached = "";
             }
 
             AutoTrajectory path = auto.trajectory(autoNum + "__1_Preload");
@@ -93,7 +95,8 @@ public class AutoBrain {
                 new WaitCommand(0.5),                        // aim settling time
                 shooterSubsystem.toggleRunIndex(true)
             ));
-            return auto;
+            cachedAuto = auto;
+            autoThatIsCached = "";
         }
 
         String[] pathNames = new String[points.length - 1];
@@ -157,6 +160,35 @@ public class AutoBrain {
                 );
                 paths[i].done().onTrue(paths[i + 1].cmd());
             }
+            else if (shouldWaitfor5After(EP)) {
+                paths[i].done().onTrue(/*Commands.sequence(
+                    Commands.sequence(
+                        new WaitCommand(1),
+                        shooterSubsystem.toggleRunIndex(true),
+                        new WaitCommand(1),
+                        intakeSubsystem.toggleWristNegFlag(true),
+                        new WaitCommand(0.4),
+                        intakeSubsystem.toggleWristNegFlag(false),
+                        intakeSubsystem.toggleWristPosFlag(true),
+                        new WaitCommand(0.6),
+                        intakeSubsystem.toggleWristPosFlag(false),
+                        new WaitCommand(1),
+                        shooterSubsystem.toggleRunIndex(false)
+                    ).deadlineFor(Commands.sequence(
+                        swerveSubsystem.runToggleAimHub(true),
+                        swerveSubsystem.runOnlyAimHubBoomBoomBoomWowCommand()
+                    )),
+
+                    swerveSubsystem.runToggleAimHub(false),
+                
+                    paths[i + 1].cmd()
+                )*/
+                    Commands.sequence(
+                        new WaitCommand(5),
+                        paths[i+ 1].cmd()
+                    )
+                );
+            } 
             else {
                 paths[i].done().onTrue(paths[i + 1].cmd());
             }
@@ -189,12 +221,15 @@ public class AutoBrain {
             lastPath.done().onTrue(swerveSubsystem.runStopDrive());
         }
 
-        return auto;
+        cachedAuto = auto;
+        autoThatIsCached = pathName;
     }
 
     public AutoRoutine fetchAuto() {
         if (cachedAuto == null) {
-            cachedAuto = buildAuto();
+            System.out.println("No cached auto detected. Building auto again...");
+            buildAuto();
+            System.out.println("Finished building auto.");
         }
         updateBuiltBoolean();
         return cachedAuto;
@@ -216,6 +251,10 @@ public class AutoBrain {
             || EP.equals("6a") || EP.equals("6b");
     }
 
+    private boolean shouldWaitfor5After(String EP) {
+        return EP.equals("67");
+    }
+
     private boolean shouldIntakeDuring(String path) {
         return path.equals("Auto2__2_5") || path.equals("Auto2__5_6a") || path.equals("Auto2__2_3") ||
             path.equals("Auto3__5_6") || path.equals("Auto1__2_3") || path.equals("Auto2__2_4a") ||
@@ -226,6 +265,6 @@ public class AutoBrain {
     }
 
     private void updateBuiltBoolean() {
-        SmartDashboard.putBoolean("AutoHasBeenBuiltAndCached", cachedAuto != null);
+        SmartDashboard.putBoolean("AutoHasBeenBuiltAndCached", cachedAuto != null && autoThatIsCached.equals(autoPathSubscriber.get().trim()));
     }
 }
