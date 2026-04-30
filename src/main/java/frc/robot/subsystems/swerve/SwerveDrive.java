@@ -7,6 +7,7 @@ import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.MathUtil;
@@ -33,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.SwerveConstants;
 
 public class SwerveDrive extends SubsystemBase {
@@ -58,6 +60,8 @@ public class SwerveDrive extends SubsystemBase {
     private Rotation2d rawGyroRotation;
 
     private final Field2d field;
+
+    LoggedNetworkNumber speed = new LoggedNetworkNumber("hehe/Speed", 4.5);
 
     public SwerveDrive(
         GyroIO gyroIO,
@@ -101,6 +105,7 @@ public class SwerveDrive extends SubsystemBase {
 
         field = new Field2d();
         SmartDashboard.putData("Odometry/Field", field);
+        
     }
 
     private double adjustAxisInput(
@@ -167,7 +172,7 @@ public class SwerveDrive extends SubsystemBase {
             double steepness = 1.8; // more precision on lower values
             
             mag = adjustAxisInput(mag, deadband, minThreshold, steepness);
-            mag *= SwerveConstants.kMagVelLimit * speedFactor;
+            mag *= SwerveConstants.kMagVelLimit  /*speed.getAsDouble()*/ * speedFactor;
             omega = adjustAxisInput(omega, deadband, minThreshold, steepness + 1);
             omega *= SwerveConstants.kRotVelLimit * speedFactor;
 

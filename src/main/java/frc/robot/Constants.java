@@ -99,7 +99,7 @@ public class Constants {
         public static final double kSlowedMult = 0.12;
         
         public static final double kMaxWheelSpeed = 20; // m/s?
-        public static final double kMagVelLimit = 4.5; // m/s
+        public static final double kMagVelLimit = 5.7; // m/s
         public static final double kRotVelLimit = 2 * (2 * Math.PI); // rad/s
 
         public static final double crossbuckDelaySeconds = .3;
