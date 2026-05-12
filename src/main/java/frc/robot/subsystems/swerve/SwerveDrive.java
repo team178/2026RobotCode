@@ -401,8 +401,13 @@ public class SwerveDrive extends SubsystemBase {
 
     public void addVisionMeasurement(Pose2d visionMeasurement, double timestamp, Matrix<N3,N1> stdDevs) {
         // higher standard deviations means vision measurements are trusted less
+        Pose2d startPose2d = getPose();
+        System.out.println("start" + startPose2d.getX());
+        System.out.println("vision" + visionMeasurement.getX());
         poseEstimator.addVisionMeasurement(visionMeasurement, timestamp, stdDevs);
-        getPose();
+        System.out.println("end" + getPose().getX());
+        // getPose();
+        // System.out.println(visionMeasurement.getX());
     }
 
     /** function that tests module motor controllers by giving them a preset state */

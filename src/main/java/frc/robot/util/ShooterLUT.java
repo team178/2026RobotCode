@@ -19,8 +19,8 @@ public class ShooterLUT {
     static {    
         flywheelSpeedTable.put(Units.inchesToMeters(90) + robotOffsetDistance + hubOffsetDistance, 395.0 - 24.0);
         flywheelSpeedTable.put(Units.inchesToMeters(80) + robotOffsetDistance + hubOffsetDistance, 380.0 - 24.0);
-        flywheelSpeedTable.put(Units.inchesToMeters(70) + robotOffsetDistance + hubOffsetDistance, 360.0 - 24.0);
-        flywheelSpeedTable.put(Units.inchesToMeters(60) + robotOffsetDistance + hubOffsetDistance, 345.0 - 14.0);
+        flywheelSpeedTable.put(Units.inchesToMeters(70) + robotOffsetDistance + hubOffsetDistance, 360.0 - 31.0);
+        flywheelSpeedTable.put(Units.inchesToMeters(60) + robotOffsetDistance + hubOffsetDistance, 345.0 - 29.0);
         flywheelSpeedTable.put(Units.inchesToMeters(50) + robotOffsetDistance + hubOffsetDistance, 325.0 - 14.0);
         flywheelSpeedTable.put(Units.inchesToMeters(40) + robotOffsetDistance + hubOffsetDistance, 310.0 - 14.0);
         flywheelSpeedTable.put(Units.inchesToMeters(30) + robotOffsetDistance + hubOffsetDistance, 290.0 - 14.0);
