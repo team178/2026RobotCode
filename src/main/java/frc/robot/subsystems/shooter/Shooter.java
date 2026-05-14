@@ -30,6 +30,8 @@ public class Shooter extends SubsystemBase {
     private final LoggedNetworkNumber loggedFeederRadPerSec = new LoggedNetworkNumber("Shooter/Feeder/Tuning/Setpoint", ShooterConstants.feederRunSpeed.in(RadiansPerSecond));
     private final LoggedNetworkNumber loggedIndexRadPerSec = new LoggedNetworkNumber("Shooter/Index/Tuning/Setpoint", ShooterConstants.indexRunSpeed.in(RadiansPerSecond));
 
+    // private final LoggedNetworkNumber loggedHubDistance = new LoggedNetworkNumber("Shooter/HubDistance", 0);
+
     private final ShooterIOInputsAutoLogged[] shooterInputs = new ShooterIOInputsAutoLogged[5];
 
     // private final Orchestra orchestra;
@@ -269,6 +271,13 @@ public class Shooter extends SubsystemBase {
         // Logger.recordOutput("Shooter/OrchestraPlaying", orchestra.isPlaying());
         // Logger.recordOutput("Shooter/DisabledTimer", (int) disabledTimer.get());
         
+
+        Pose2d robotPose = robotPoseSupplier.get();
+        Pose2d hubPose = FieldConstants.getHubCenter();
+
+        Distance hubDistance = Meters.of(robotPose.getTranslation().getDistance(hubPose.getTranslation()));
+        Logger.recordOutput("DriverLogs/hubDistance", hubDistance.baseUnitMagnitude() / 39.3701 - 12.5 - 23);
+
         if (runShooterFlag) {
             // shooterIOL.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
             // shooterIOM.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
@@ -276,10 +285,7 @@ public class Shooter extends SubsystemBase {
             if(maxShooterFlag) {
                 shootWithDistance(Meters.of(178));
             } else {
-                Pose2d robotPose = robotPoseSupplier.get();
-                Pose2d hubPose = FieldConstants.getHubCenter();
-
-                Distance hubDistance = Meters.of(robotPose.getTranslation().getDistance(hubPose.getTranslation()));
+                
 
                 shootWithDistance(hubDistance);
             }
