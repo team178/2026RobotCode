@@ -43,6 +43,9 @@ public class Shooter extends SubsystemBase {
     public boolean runIndexFlag = false;
     private boolean maxShooterFlag = false;
 
+    private boolean left = false;
+    private boolean right = false;
+
     private final Supplier<Pose2d> robotPoseSupplier;
 
     public Shooter(ShooterIO shooterIOL, ShooterIO shooterIOM, ShooterIO shooterIOR, ShooterIO feederIO, ShooterIO indexIO, Supplier<Pose2d> robotPoseSupplier) {
@@ -217,6 +220,18 @@ public class Shooter extends SubsystemBase {
         });
     }
 
+    public Command runToggleLeft(boolean on) {
+        return runOnce(() -> {
+            left = on;
+        });
+    }
+
+    public Command runToggleRight(boolean on) {
+        return runOnce(() -> {
+            right = on;
+        });
+    }
+
     public Command runShooterOff() {
         return runOnce(() -> {
             runShooterFlag = false;
@@ -276,7 +291,7 @@ public class Shooter extends SubsystemBase {
         Pose2d hubPose = FieldConstants.getHubCenter();
 
         Distance hubDistance = Meters.of(robotPose.getTranslation().getDistance(hubPose.getTranslation()));
-        Logger.recordOutput("DriverLogs/hubDistance", hubDistance.baseUnitMagnitude() / 39.3701 - 12.5 - 23);
+        Logger.recordOutput("DriverLogs/hubDistance", hubDistance.baseUnitMagnitude());
 
         if (runShooterFlag) {
             // shooterIOL.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
@@ -299,8 +314,8 @@ public class Shooter extends SubsystemBase {
                 // (((int) (8 * Timer.getFPGATimestamp())) % 8 == 0)
                 // ? 1 : 1
                 ;
-            feederIO.setVelocityClosedLoop(RadiansPerSecond.of(reverseFeeder ? -loggedFeederRadPerSec.get() : loggedFeederRadPerSec.get()));
-            indexIO.setVelocityClosedLoop(RadiansPerSecond.of(reverseFeeder ? 0 : voltageMult * loggedIndexRadPerSec.get()));
+            feederIO.setVelocityClosedLoop(RadiansPerSecond.of((reverseFeeder || left || right) ? -loggedFeederRadPerSec.get() : loggedFeederRadPerSec.get()));
+            indexIO.setVelocityClosedLoop(RadiansPerSecond.of((reverseFeeder || left || right) ? -voltageMult * loggedIndexRadPerSec.get() : voltageMult * loggedIndexRadPerSec.get()));
         } else {
             feederIO.setOpenLoop(Volts.zero());
             indexIO.setOpenLoop(Volts.zero());
@@ -329,7 +344,7 @@ public class Shooter extends SubsystemBase {
         Logger.processInputs("Shooter/Indexer", shooterInputs[4]);
 
         if (DriverStation.isDisabled()) {
-            // runShooterFlag = false;
+            runShooterFlag = true;
             runIndexFlag = false;
         }
     }

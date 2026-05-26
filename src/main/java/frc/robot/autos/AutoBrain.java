@@ -117,10 +117,13 @@ public class AutoBrain {
             Commands.parallel(
                 shooterSubsystem.runShooterOn(),
                 Commands.sequence(
-                    intakeSubsystem.toggleWristPosFlag(true),
                     intakeSubsystem.toggleRollerFlag(true),
-                    new WaitCommand(0.5),
+                    intakeSubsystem.toggleWristPosFlag(true),
+                    new WaitCommand(4),
                     intakeSubsystem.toggleWristPosFlag(false)
+                    // new WaitCommand(0.4)
+                    
+
                 ),
                 paths[0].cmd()
             )
@@ -184,7 +187,7 @@ public class AutoBrain {
                     paths[i + 1].cmd()
                 )*/
                     Commands.sequence(
-                        new WaitCommand(5),
+                        new WaitCommand(0.1),
                         paths[i+ 1].cmd()
                     )
                 );

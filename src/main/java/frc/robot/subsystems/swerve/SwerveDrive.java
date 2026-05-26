@@ -172,7 +172,7 @@ public class SwerveDrive extends SubsystemBase {
             double steepness = 1.8; // more precision on lower values
             
             mag = adjustAxisInput(mag, deadband, minThreshold, steepness);
-            mag *= SwerveConstants.kMagVelLimit  /*speed.getAsDouble()*/ * speedFactor;
+            mag *= (DriverStation.isAutonomous() ? 4.5 : SwerveConstants.kMagVelLimit)  /*speed.getAsDouble()*/ * speedFactor;
             omega = adjustAxisInput(omega, deadband, minThreshold, steepness + 1);
             omega *= SwerveConstants.kRotVelLimit * speedFactor;
 

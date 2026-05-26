@@ -173,7 +173,10 @@ public class RobotContainer {
         // agitator feed/unjam
         driverController.povDown().onTrue(shooter.runToggleReverseFeeder(true));
         driverController.povDown().onFalse(shooter.runToggleReverseFeeder(false));
-
+        driverController.povDownLeft().onTrue(shooter.runToggleLeft(true));
+        driverController.povDownRight().onTrue(shooter.runToggleRight(true));
+        driverController.povDownLeft().onFalse(shooter.runToggleLeft(false));
+        driverController.povDownRight().onFalse(shooter.runToggleRight(false));
         // intake wrist up/down
         auxController.a().onTrue(intake.toggleWristPosFlag(true));
         auxController.a().onFalse(intake.toggleWristPosFlag(false));
