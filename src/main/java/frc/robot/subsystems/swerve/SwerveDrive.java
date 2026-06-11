@@ -61,6 +61,11 @@ public class SwerveDrive extends SubsystemBase {
 
     private final Field2d field;
 
+    private double joyX;
+    private double joyY;
+    private boolean posRotCtrl = false;
+
+
     LoggedNetworkNumber speed = new LoggedNetworkNumber("hehe/Speed", 4.5);
 
     public SwerveDrive(
@@ -98,7 +103,7 @@ public class SwerveDrive extends SubsystemBase {
 
         trajVXController = new PIDController(8, 0, 0);
         trajVYController = new PIDController(8, 0, 0);
-        trajHeadingController = new PIDController(3, 0, 0);
+        trajHeadingController = new PIDController(4, 0, 0);
         trajHeadingController.enableContinuousInput(0, 2 * Math.PI);
 
         lastMove = Timer.getFPGATimestamp();
@@ -107,6 +112,13 @@ public class SwerveDrive extends SubsystemBase {
         SmartDashboard.putData("Odometry/Field", field);
         
     }
+
+    public Command togglePos() {
+        return runOnce(() -> {
+            posRotCtrl = !posRotCtrl;
+        });
+    }
+
 
     private double adjustAxisInput(
         double controllerInput,
@@ -146,12 +158,21 @@ public class SwerveDrive extends SubsystemBase {
         DoubleSupplier xInput,
         DoubleSupplier yInput,
         DoubleSupplier omegaInput,
+        DoubleSupplier imgOmegaInput,
         DoubleSupplier speedFactorInput
     ) {
         return run(() -> {
             double xInputValue = xInput.getAsDouble();
             double yInputValue = yInput.getAsDouble();
+
+            
+
+
             double omegaInputValue = omegaInput.getAsDouble();
+            double imgOmegaInputValue = imgOmegaInput.getAsDouble();
+            joyX = -omegaInputValue;
+            joyY = imgOmegaInputValue;
+            
 
             // see https://docs.wpilib.org/en/stable/docs/software/basic-programming/joystick.html#joystick-class
             yInputValue *= -1; // y-axis is inverted on joystick
@@ -190,6 +211,11 @@ public class SwerveDrive extends SubsystemBase {
         Translation2d robotToHub = hubPose.getTranslation().minus(robotPose.getTranslation());
         Rotation2d targetHeading = robotToHub.getAngle().minus(Rotation2d.k180deg);
 
+        Translation2d rightJoy = new Translation2d(joyX, joyY);
+        Rotation2d joyHeading = rightJoy.getAngle().plus(Rotation2d.kCCW_90deg);
+        boolean posRot = (joyX * joyX + joyY * joyY) > 0.04;
+
+
         Logger.recordOutput("Swerve/AutoAlignTargetPose", new Pose2d(robotPose.getTranslation(), targetHeading));
         Logger.recordOutput("Swerve/DistanceToHub", robotToHub.getNorm());
         Logger.recordOutput("Field/HubPose", hubPose);
@@ -200,7 +226,13 @@ public class SwerveDrive extends SubsystemBase {
                 robotPose.getRotation().getRadians(),
                 targetHeading.getRadians()
             );
-        }
+        } else if (posRotCtrl && posRot) {
+		speeds.omegaRadiansPerSecond = trajHeadingController.calculate(
+			robotPose.getRotation().getRadians(),
+			joyHeading.getRadians()
+		);
+	}
+
     }
 
     private void submitChassisSpeeds(
@@ -437,6 +469,7 @@ public class SwerveDrive extends SubsystemBase {
     public void periodic() {
         Logger.recordOutput("Swerve/AimHubFlag", aimHubFlag.get());
         Logger.recordOutput("Swerve/CrossbuckEnabled", toCrossbuck);
+        Logger.recordOutput("WiWi", posRotCtrl);
 
         // updated all hardware inputs
         gyroIO.updateInputs(gyroIOInputs);

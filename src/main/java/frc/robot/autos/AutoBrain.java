@@ -119,9 +119,15 @@ public class AutoBrain {
                 Commands.sequence(
                     intakeSubsystem.toggleRollerFlag(true),
                     intakeSubsystem.toggleWristPosFlag(true),
-                    new WaitCommand(4),
+                    new WaitCommand(0.5),
                     intakeSubsystem.toggleWristPosFlag(false)
-                    // new WaitCommand(0.4)
+                    // intakeSubsystem.toggleWristNegFlag(true),
+                    // new WaitCommand(1),
+                    // intakeSubsystem.toggleWristNegFlag(false),
+                    // intakeSubsystem.toggleWristPosFlag(true),
+                    // new WaitCommand(2),
+                    // intakeSubsystem.toggleWristPosFlag(false)
+            
                     
 
                 ),

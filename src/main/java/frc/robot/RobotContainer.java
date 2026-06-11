@@ -148,12 +148,13 @@ public class RobotContainer {
             driverController::getLeftX,          // vx
             driverController::getLeftY,          // vy
             driverController::getRightX,         // omega
+            driverController::getRightY,
             driverController::getLeftTriggerAxis // raw slow input
         ));
 
         // reset robot orientation (doesn't work with vision or FMS)
         driverController.y().onTrue(swerve.runZeroGyro());
-
+        driverController.a().onTrue(swerve.togglePos());
         // hub aim on/off
         driverController.leftBumper().onTrue(swerve.runToggleAimHub(true));
         driverController.leftBumper().onFalse(swerve.runToggleAimHub(false));
@@ -198,8 +199,11 @@ public class RobotContainer {
         auxController.leftBumper().onTrue(shooter.toggleRunShooter());
 
         // shooter goes to max speed
-        auxController.y().onTrue(shooter.switchMaxShooterFlag(true));
-        auxController.y().onFalse(shooter.switchMaxShooterFlag(false));
+        // auxController.y().onTrue(shooter.switchMaxShooterFlag(true));
+        // auxController.y().onFalse(shooter.switchMaxShooterFlag(false));
+        auxController.y().onTrue(shooter.setRevWiWi(true));
+	    auxController.y().onFalse(shooter.setRevWiWi(false));
+
     }
 
     public void testPeriodic() {

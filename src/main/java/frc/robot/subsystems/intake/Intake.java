@@ -217,7 +217,8 @@ public class Intake extends SubsystemBase {
 
         if (isRollingFlag && !isWristMovingDown) {
             // rollerIO.setClosedLoop(isDirectionReversed ? -speed.get() : speed.get());
-            double volts = DriverStation.isAutonomous() ? 12 : 8;
+            double volts = DriverStation.isAutonomous() ? 12 : 8
+            ;
             rollerIO.setOpenLoop(Volts.of(isDirectionReversed ? -volts : volts));
         } else {
             rollerIO.setOpenLoop(Volts.zero());

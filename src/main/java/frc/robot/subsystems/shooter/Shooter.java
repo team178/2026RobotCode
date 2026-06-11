@@ -46,6 +46,8 @@ public class Shooter extends SubsystemBase {
     private boolean left = false;
     private boolean right = false;
 
+    private boolean revWiWi = false;
+
     private final Supplier<Pose2d> robotPoseSupplier;
 
     public Shooter(ShooterIO shooterIOL, ShooterIO shooterIOM, ShooterIO shooterIOR, ShooterIO feederIO, ShooterIO indexIO, Supplier<Pose2d> robotPoseSupplier) {
@@ -69,6 +71,13 @@ public class Shooter extends SubsystemBase {
 
         // orchestra.loadMusic("fugue.chrp");
     }
+
+    public Command setRevWiWi(boolean on) {
+	return runOnce(() -> {
+		revWiWi = on;
+	});
+}
+
 
     private void shootWithDistance(Distance distance) {
         AngularVelocity shooterVelocity = ShooterLUT.getFlywheelSpeedAtDistance(distance.plus(shooterDistanceAdjust));
@@ -292,6 +301,7 @@ public class Shooter extends SubsystemBase {
 
         Distance hubDistance = Meters.of(robotPose.getTranslation().getDistance(hubPose.getTranslation()));
         Logger.recordOutput("DriverLogs/hubDistance", hubDistance.baseUnitMagnitude());
+        Logger.recordOutput("WiW/inRange", hubDistance.baseUnitMagnitude() < 2.5);
 
         if (runShooterFlag) {
             // shooterIOL.setVelocityClosedLoop(loggedFlywheelRadPerSec.get());
@@ -314,9 +324,20 @@ public class Shooter extends SubsystemBase {
                 // (((int) (8 * Timer.getFPGATimestamp())) % 8 == 0)
                 // ? 1 : 1
                 ;
-            feederIO.setVelocityClosedLoop(RadiansPerSecond.of((reverseFeeder || left || right) ? -loggedFeederRadPerSec.get() : loggedFeederRadPerSec.get()));
-            indexIO.setVelocityClosedLoop(RadiansPerSecond.of((reverseFeeder || left || right) ? -voltageMult * loggedIndexRadPerSec.get() : voltageMult * loggedIndexRadPerSec.get()));
-        } else {
+            // feederIO.setVelocityClosedLoop(RadiansPerSecond.of((reverseFeeder || left || right) ? -loggedFeederRadPerSec.get() : loggedFeederRadPerSec.get()));
+            // indexIO.setVelocityClosedLoop(RadiansPerSecond.of((reverseFeeder || left || right) ? -voltageMult * loggedIndexRadPerSec.get() : voltageMult * loggedIndexRadPerSec.get()));
+            feederIO.setVelocityClosedLoop(RadiansPerSecond.of(loggedFeederRadPerSec.get()));
+	        indexIO.setVelocityClosedLoop(RadiansPerSecond.of(loggedFeederRadPerSec.get()));
+
+        }
+
+        if(revWiWi) {
+            feederIO.setVelocityClosedLoop(RadiansPerSecond.of(-loggedFeederRadPerSec.get()));
+            indexIO.setVelocityClosedLoop(RadiansPerSecond.of(-loggedFeederRadPerSec.get()));
+        }
+
+        
+        if(!revWiWi && !runIndexFlag){
             feederIO.setOpenLoop(Volts.zero());
             indexIO.setOpenLoop(Volts.zero());
         }
